@@ -1,4 +1,4 @@
-Sub MergeTables()
+Sub MergebyPriority()
 
     Application.ScreenUpdating = False ' 화면 업데이트 끄기
     Application.DisplayAlerts = False ' 경고 표시 안함
