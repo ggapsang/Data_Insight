@@ -8,9 +8,9 @@ Sub AppendTextToFront()
 
   For Each cell In Selection.Cells
   
-      Dim value As Variant
-      value = cell.value
-      cell.value = AppendText & value
+    Dim value As Variant
+    value = cell.value
+    cell.value = AppendText & value
   
   Next cell
     
