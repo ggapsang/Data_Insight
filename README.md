@@ -13,7 +13,7 @@
 - SUBSTITUTE(C, "-", "")
 #### TEXTJOIN : excel 2016이하 버전에서 사용할 수 있는 TEXTJOIN 함수를 사용자 정의 함수로 구현
 
-### Data Insight - Python Library : 효율적인 사무 처리를 위한 파이선 코드 조각. pandas를 이용하여 데이터 처리 시 자주 사용하는 기능을 클래스 또는 함수로 구현함
+### Data Insight - pyForData : 효율적인 사무 처리를 위한 파이선 코드 조각. pandas를 이용하여 데이터 처리 시 자주 사용하는 기능을 클래스 또는 함수로 구현함
 #### process_batch_files.py : 다량의 파일들에 대한 일괄 삭제, 복사, 이동 등
 #### convert_templates.py : 정비 프로세스가 진행되며 각 단계마다 달라지는 템플릿들(속성 해더 등)에 대한 자동 변환
 #### process_OCR.py : 각종 데이터시트와 리스트에 대한 OCR 처리
