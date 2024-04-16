@@ -12,7 +12,7 @@ class FileList() :
         check_dict = {}
         not_in_list = []
 
-        if reverse = False :
+        if reverse == False :
             for file in tqdm(self.file_list) :
                 if file in files_in_folder :
                     check_dict[file] = True
@@ -30,7 +30,7 @@ class FileList() :
 
     def remove_files(self, folder_path, reverse=False, into_bottom=False) :
         
-        if reverse=False, into_bottom=False :
+        if reverse == False and into_bottom==False :
             
             files_in_folder = os.listdir(folder_path)
 
@@ -41,7 +41,7 @@ class FileList() :
                 else :
                     continue
 
-        elif reverse=False, into_bottom=True :
+        elif reverse==False and into_bottom==True :
             for root, dirs, files in tqdm(os.walk(folder_path, topdown=False)) :
                 for name in files :
                     if name in self.file_list :
@@ -50,7 +50,7 @@ class FileList() :
                     else :
                         continue
 
-        elif reverse=True, into_bottom=False :
+        elif reverse==True and into_bottom==False :
 
             files_in_folder = os.listdir(folder_path)
             
@@ -70,11 +70,11 @@ class FileList() :
                     else :
                         continue
 
-    def copy_files(self, from_folder, to_folder, reveres=False, into_bottom=False) :
+    def copy_files(self, from_folder, to_folder, reverse=False, into_bottom=False) :
         
         from_folder_files = os.listdir(from_folder)
 
-        if reverse=False, into_bottom=False :
+        if reverse==False and into_bottom==False :
             for file in tqdm(from_folder_files) :
 
                 if file in self.file_list :
@@ -85,15 +85,15 @@ class FileList() :
                 else :
                     continue
 
-        elif reverse=False, into_bottom=True :
-            for root, dirs, files in tqdm(os.walk(folder_path, topdown=False)) :
+        elif reverse==False and into_bottom==True :
+            for root, dirs, files in tqdm(os.walk(from_folder, topdown=False)) :
                 for name in files :
                     if name in self.file_list :
                         from_path = os.path.join(root, name)
                         to_path = os.path.join(to_folder, name)
                         shutil.copyfile(from_path, to_path)
 
-        elif reverse=True, into_bottom=False :
+        elif reverse==True and into_bottom==False :
             for file in tqdm(from_folder_files) :
 
                 if file not in self.file_list :
@@ -106,7 +106,7 @@ class FileList() :
 
 
         else :
-            for root, dirs, files in tqdm(os.walk(folder_path, topdown=False)) :
+            for root, dirs, files in tqdm(os.walk(from_folder, topdown=False)) :
                 for name in files :
                     if name not in self.file_list :
                         from_path = os.path.join(root, name)
@@ -118,7 +118,7 @@ class FileList() :
         
         from_folder_files = os.listdir(from_folder)
 
-        if reverse=False, into_bottom=False :
+        if reverse==False and into_bottom==False :
             for file in tqdm(from_folder_files) :
 
                 if file in self.file_list :
@@ -129,15 +129,15 @@ class FileList() :
                 else :
                     continue
 
-        elif reverse=False, into_bottom=True :
-            for root, dirs, files in tqdm(os.walk(folder_path, topdown=False)) :
+        elif reverse==False and into_bottom==True :
+            for root, dirs, files in tqdm(os.walk(from_folder, topdown=False)) :
                 for name in files :
                     if name in self.file_list :
                         from_path = os.path.join(root, name)
                         to_path = os.path.join(to_folder, name)
                         shutil.move(from_path, to_path)
 
-        elif reverse=True, into_bottom=False :
+        elif reverse==True and into_bottom==False :
             for file in tqdm(from_folder_files) :
 
                 if file not in self.file_list :
@@ -150,7 +150,7 @@ class FileList() :
 
 
         else :
-            for root, dirs, files in tqdm(os.walk(folder_path, topdown=False)) :
+            for root, dirs, files in tqdm(os.walk(from_folder, topdown=False)) :
                 for name in files :
                     if name not in self.file_list :
                         from_path = os.path.join(root, name)
