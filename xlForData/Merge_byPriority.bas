@@ -76,4 +76,5 @@ Sub MergebyPriority()
     Application.StatusBar = False ' 상태 바 초기화
     Application.ScreenUpdating = True ' 화면 업데이트
     Application.DisplayAlerts = True
+
 End Sub
