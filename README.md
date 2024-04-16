@@ -1,4 +1,4 @@
-## Data-Insight
+## Data Insight
 
 ### Data Insight.xlam : 엑셀에서의 작업을 위한 매크로 모음. xlam 파일에 모아 둔 모듈, 사용자 폼, 리본 메뉴 양식
 #### TextEdit_AppendFront : 셀 안의 텍스트 앞에 텍스트를 연결함
