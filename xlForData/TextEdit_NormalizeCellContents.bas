@@ -1,8 +1,10 @@
 Sub NormalizeCellContents()
+
     Dim replaceWith As String
     replaceWith = InputBox("구분자 설정 : ", "Input Required", ", ")
     ReplaceNewLines replaceWith
     UnmergeAndClean replaceWith
+
 End Sub
 
 Sub ReplaceNewLines(replaceWith As String)
