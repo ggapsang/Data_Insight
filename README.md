@@ -3,23 +3,40 @@
 ### Data Insight.xlam 
 엑셀에서의 작업을 위한 매크로 모음. xlam 파일에 모아 둔 모듈, 사용자 폼, 리본 메뉴 양식
 
-#### TextEdit_AppendFront 
+#### Merge_ 타입
+테이블 병합, 조인 등을 위한 모듈
+##### Merge_byPriority
+우선순위 병합 : 두 개의 시트를 key와 column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대해서는 입력 우선순위를 정함(한쪽이 공란인 경우는 반대쪽을 취함)
+
+#### RangeOps_ 타입
+range 개체 조작을 위한 모듈
+##### RangeOps_CompareValues
+두 개의 시트를 key column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대헛는 입력 우선위를 정함
+##### RangeOps_SwapVRange
+두 개의 선택한 영역 사이의 값을 바꾼다
+
+#### TextEidt_ 타입
+##### TextEdit_AppendFront 
 셀 안의 텍스트 앞에 텍스트를 연결함
-#### TextEdit_AppendBack 
+##### TextEdit_AppendBack 
 셀 안의 텍스트 뒤에 텍스트를 연결함
-#### TextEdit_SliceFront 
+##### TextEdit_SliceFront 
 특정한 문자(열)가 최초로 등장하는 지점까지 텍스트 자르기
-#### TextEdit_SliceBack 
+##### TextEdit_SliceBack 
 특정한 문자(열)가 최초로 등장한 다음부터 텍스트 자르기
-#### UseXlsxFunction 
+##### UseXlsxFunction 
   : 엑셀의 기존 함수를 이용하는 방법
     - LEFT(C, 2)
     - RIGHT(C, 2)
     - MID(C, 2, 3)
     - TEXT(C, "")
     - SUBSTITUTE(C, "-", "")
-#### TEXTJOIN 
+
+#### newFucntion 타입
+##### TEXTJOIN 
 excel 2016이하 버전에서 사용할 수 있는 TEXTJOIN 함수를 사용자 정의 함수로 구현
+##### RCOUNTA
+빈셀이 ""일 경우 COUNTA가 제대로 작동하지 않는 문제를 해결함
 
 ### Data Insight - pyForData 
 효율적인 사무 처리를 위한 파이선 코드 조각. pandas를 이용하여 데이터 처리 시 자주 사용하는 기능을 클래스 또는 함수로 구현함
