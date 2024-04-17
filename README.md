@@ -12,7 +12,7 @@
 range 개체 조작을 위한 모듈
 ##### RangeOps_CompareValues
 두 개의 시트를 key column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대헛는 입력 우선위를 정함
-##### RangeOps_SwapVRange
+##### RangeOps_SwapRange
 두 개의 선택한 영역 사이의 값을 바꾼다
 
 #### TextEidt_ 타입
