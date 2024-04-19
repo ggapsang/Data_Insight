@@ -1,4 +1,4 @@
-# lookuplookup
+# EasyLookup
 VBA for Excel
 
 사용방법 및 주의사항
