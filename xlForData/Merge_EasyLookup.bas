@@ -16,6 +16,7 @@ Function GetWorkbook(ByVal sFullName As String) As Workbook
 
     On Error GoTo 0
 End Function
+
 Function MatchKeyValue(keyValue As Variant, headerRow As Range) As Long
 Dim cell As Range
     Dim i As Long
@@ -36,6 +37,7 @@ Dim cell As Range
 
     MatchKeyValue = 0
 End Function
+
 Function MatchValue(lookupValue As Variant, headerRow As Range) As Long
     Dim cell As Range
 
@@ -57,14 +59,14 @@ Function MatchValue(lookupValue As Variant, headerRow As Range) As Long
 End Function
 
 Sub Merge_EasyLookup()
-    ' À¯ÀúÆû¿¡¼­ °ªÀ» ¼±ÅÃÇÒ ¼ö ÀÖ°Ô º¸¿©ÁÜ
+    ' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     LookupInputForm.Show
 End Sub
 
 
 Sub UpdateTargetWorksheet(selectedItems As Collection, srcHeaderRow As Long, tgtHeaderRow As Long, keyValueText As String)
     
-    ' ¸ÅÅ©·Î ÀÛ¾÷Áß ½ºÅ©¸° È°¼ºÈ­ Á¤Áö
+    ' ï¿½ï¿½Å©ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½
     Application.ScreenUpdating = False
     Application.DisplayStatusBar = False
     Application.Calculation = xlCalculationManual
@@ -88,31 +90,31 @@ Sub UpdateTargetWorksheet(selectedItems As Collection, srcHeaderRow As Long, tgt
     Dim tgtKeyCells As Object
     Dim rowNumber As Variant
 
-     ' source worksheet ¼¼ÆÃ
+     ' source worksheet ï¿½ï¿½ï¿½ï¿½
     Set srcWb = ActiveWorkbook
     Set srcWs = ActiveSheet
 
-     ' target workbook ¼¼ÆÃ ¸í·ÉÃ¢ ½ÇÇà
-    tgtFile = Application.GetOpenFilename(FileFilter:="Excel Files (*.xls*), *.xls*", Title:="µ¤¾î¾µ ÆÄÀÏ ¼±ÅÃ", MultiSelect:=False)
+     ' target workbook ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½ï¿½ï¿½
+    tgtFile = Application.GetOpenFilename(FileFilter:="Excel Files (*.xls*), *.xls*", Title:="ï¿½ï¿½ï¿½î¾µ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½", MultiSelect:=False)
     If tgtFile = False Then
-        MsgBox "ºÒ·¯¿Ã ÆÄÀÏÀÌ ¼±ÅÃµÇÁö ¾Ê¾Æ¼­ ¸ÅÅ©·Î¸¦ Á¾·áÇÕ´Ï´Ù"
+        MsgBox "ï¿½Ò·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ ï¿½Ê¾Æ¼ï¿½ ï¿½ï¿½Å©ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½"
         Exit Sub
     End If
 
-    ' target workbookÀÌ ÀÌ¹Ì ¿­·ÁÀÖÀ» °æ¿ì
+    ' target workbookï¿½ï¿½ ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     Set tgtWb = GetWorkbook(tgtFile)
 
-    ' target workbookÀÌ ¿­·Á ÀÖÁö ¾ÊÀ» °æ¿ì ÇØ´ç ÆÄÀÏÀ» ¿­À½
+    ' target workbookï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     If tgtWb Is Nothing Then
         Set tgtWb = Workbooks.Open(tgtFile)
     End If
 
-    ' target worksheet ¼¼ÆÃ
+    ' target worksheet ï¿½ï¿½ï¿½ï¿½
     Set tgtWs = tgtWb.ActiveSheet
 
     startTime = Timer
 
-    ' source worksheet¿Í target worksheetÀÇ Å° °ªÀÌ ÇØ´õ Çà ¸î¿­¿¡ ÀÖ´ÂÁö È®ÀÎ
+    ' source worksheetï¿½ï¿½ target worksheetï¿½ï¿½ Å° ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ ï¿½î¿­ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
     srcKeyValueCol = MatchKeyValue(keyValueText, srcWs.Rows(srcHeaderRow))
     tgtKeyValueCol = MatchKeyValue(keyValueText, tgtWs.Rows(srcHeaderRow))
     ReDim srcLookupValueCol(selectedItems.count - 1)
@@ -124,15 +126,15 @@ Sub UpdateTargetWorksheet(selectedItems As Collection, srcHeaderRow As Long, tgt
     Next j
 
     If IsError(srcKeyValueCol) Or IsError(tgtKeyValueCol) Then
-        MsgBox "ÇØ´õ Çà¿¡¼­ Å° °ªÀ» Ã£Áö ¸øÇØ ¸ÅÅ©·Î¸¦ Á¾·áÇÕ´Ï´Ù."
+        MsgBox "ï¿½Ø´ï¿½ ï¿½à¿¡ï¿½ï¿½ Å° ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½."
         Exit Sub
     End If
 
 
-    ' targetworksheetÀÇ ¸¶Áö¸· Çà Ã£±â(ÁÖÀÇ - sr no°¡ ´Ù Ã¤¿öÁöÁö ¾Ê°í Áß°£¿¡ ²÷±â¸é ¿¡·¯°¡ »ý±æ ¼ö ÀÖÀ½)
+    ' targetworksheetï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ã£ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ - sr noï¿½ï¿½ ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     lastRow = tgtWs.Cells(tgtWs.Rows.count, tgtKeyValueCol).End(xlUp).Row
 
-    ' µñ¼Å³Ê¸® »ý¼º
+    ' ï¿½ï¿½Å³Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½
     Set tgtKeyCells = New Collection
     On Error Resume Next
     For i = tgtHeaderRow + 1 To lastRow
@@ -142,20 +144,20 @@ Sub UpdateTargetWorksheet(selectedItems As Collection, srcHeaderRow As Long, tgt
 
     ' loop
     For Each srcKeyCell In srcWs.Range(srcWs.Cells(srcHeaderRow + 1, srcKeyValueCol), srcWs.Cells(srcWs.Rows.count, srcKeyValueCol).End(xlUp))
-        ' ÇÊÅÍ°ª¸¸ º¸ÀÌ°Ô ¹Ý¿µÇÔ
+        ' ï¿½ï¿½ï¿½Í°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ ï¿½Ý¿ï¿½ï¿½ï¿½
         If srcWs.Rows(srcKeyCell.Row).Hidden = False Then
-            ' Å° °ªÀ» ±âÁØÀ¸·Î target worksheetÀÇ °ªµéÀÌ ÀÏÄ¡ÇÏ´ÂÁö¸¦ ºñ±³ÇÔ
+            ' Å° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ target worksheetï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             On Error Resume Next
             rowNumber = tgtKeyCells(CStr(srcKeyCell.value))
             On Error GoTo 0
             If Not IsEmpty(rowNumber) Then
-                 ' ÇÊÅÍ°ª¸¸ º¸ÀÌ°Ô ¹Ý¿µÇÔ
+                 ' ï¿½ï¿½ï¿½Í°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ ï¿½Ý¿ï¿½ï¿½ï¿½
                 If tgtWs.Rows(rowNumber).Hidden = False Then
-                    ' source worksheets¿Í target worksheetsÀÇ °ªµéÀ» ºñ±³ÇÏ¿© º¯°æÇÔ
+                    ' source worksheetsï¿½ï¿½ target worksheetsï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     For j = LBound(srcLookupValueCol) To UBound(srcLookupValueCol)
                         If tgtWs.Cells(rowNumber, tgtLookupValueCol(j)).value <> srcWs.Cells(srcKeyCell.Row, srcLookupValueCol(j)).value Then
                             tgtWs.Cells(rowNumber, tgtLookupValueCol(j)).value = srcWs.Cells(srcKeyCell.Row, srcLookupValueCol(j)).value
-                            tgtWs.Cells(rowNumber, tgtLookupValueCol(j)).Interior.Color = RGB(255, 165, 0) 'RGB º¯°æ'
+                            tgtWs.Cells(rowNumber, tgtLookupValueCol(j)).Interior.Color = RGB(255, 165, 0) 'RGB ï¿½ï¿½ï¿½ï¿½'
                         End If
                     Next j
                 End If
@@ -163,17 +165,17 @@ Sub UpdateTargetWorksheet(selectedItems As Collection, srcHeaderRow As Long, tgt
         End If
     Next srcKeyCell
 
-    ' ¸ÅÅ©·Î ÀÛ¾÷ Áß ½ºÅ©¸° È°¼ºÈ­ Á¤Áö
+    ' ï¿½ï¿½Å©ï¿½ï¿½ ï¿½Û¾ï¿½ ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
     Application.DisplayStatusBar = True
     Application.EnableEvents = True
 
-     ' ÀÛ¾÷½Ã°£ ÃøÁ¤
+     ' ï¿½Û¾ï¿½ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
     finishTime = Timer - startTime
 
-    ' ¹Ù²ï °ªÀ¸·Î ÆÄÀÏÀ» ÀÚµ¿À¸·Î ÀúÀåÇÔ (ÇöÀç´Â ÀúÀå ±â´É ¿ÀÇÁ »óÅÂ ÆÄÀÏÀÌ ¿­·ÁÀÖÁö ¾Ê°Å³ª °ªÀ» ÀÚµ¿À¸·Î ÀúÀåÇÏ·Á¸é ¾Æ·¡ ÁÙ ÄÚµå¿¡ ' Ç¥½Ã¸¦ »©¸é µÊ
+    ' ï¿½Ù²ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ ï¿½Úµå¿¡ ' Ç¥ï¿½Ã¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
     'tgtWb.Save
-    MsgBox "¿Ï·á" & Format(Int(finishTime / 60), "0") & " min " & Format(finishTime Mod 60, "0.00") & " sec"
+    MsgBox "ï¿½Ï·ï¿½" & Format(Int(finishTime / 60), "0") & " min " & Format(finishTime Mod 60, "0.00") & " sec"
 
 End Sub
