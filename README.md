@@ -2,22 +2,30 @@
 
 ### Data Insight.xlam 
   엑셀에서의 작업을 위한 매크로 모음. xlam 파일에 모아 둔 모듈, 사용자 폼, 리본 메뉴 양식
+모듈 구분
+1) 'Extract_' 타입 모듈들
+2) 'Merge_' 타입 모듈들
+3) 'RangeOps' 타입 모듈들
+4) 'TextEdit' 타입 모듈들
+5) 'newFucntion' 타입 모듈들
 
-#### Extract_ 타입
+
+#### Extract_ 타입 모듈
   동일한 엑셀 템플릿 안에서 원하는 값들을 추출함
 
 ##### Extract_attributes_xlFofrmDs 
 ##### Extract_attributes_xlFormDs_sub_m
 : 엑셀 이름 관리자를 통해 이름이 정의된 데이터 시트 양식에서 값들을 추출함
 
-#### Merge_ 타입
+#### Merge_ 타입 모듈
   테이블 병합, 조인 등을 위한 모듈
   
 ##### Merge_byPriority
   우선순위 병합 : 두 개의 시트를 key와 column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대해서는 입력 우선순위를 정함(한쪽이 공란인 경우는 반대쪽을 취함)
 ##### Merge_EasyLookup
   데이터 업데이트(별도 read me 파일 참조)
-#### RangeOps_ 타입
+
+#### RangeOps_ 타입모듈
   range 개체 조작을 위한 모듈
   
 ##### RangeOps_CompareValues
