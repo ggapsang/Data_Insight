@@ -1,11 +1,4 @@
 import pandas as pd
-"""
-data = {
-    'SR No': [1, 1, 1, 1, 2, 2, 2],
-    'COL': ['A', 'B', 'C', 'D', 'E', 'A', 'B'],
-    'VALUE': [2, 34, 51, 3, None, 12, 2]
-}
-"""
 
 class Table() :
     def __init__(self, df) :
