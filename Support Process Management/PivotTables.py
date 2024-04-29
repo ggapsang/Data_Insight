@@ -10,5 +10,8 @@ class Table() :
         return pivot_df
     
     def melst(self) :
-        melted_df = df.reset_index().melt(id_vars='SR No', value_name='VALUE').dropna(subset=['VALUE'])
+        melted_df = self.df.melt(id_vars='SR No', 
+                      var_name='속성명', 
+                      value_name='속성값').dropna(subset=['속성값'])
+
         return melted_df
