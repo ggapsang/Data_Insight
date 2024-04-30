@@ -8,7 +8,7 @@ import PivotTables as pt
 
 
 class TableTransformer() :
-    
+    """작업 프로세의 매 단계마다의 템플릿을 이전 템플릿에서 자동으로 변환함"""
     def __init__(self, df, df_cct, df_indiv):
         self.df = df
         self.df_cct = df_cct
