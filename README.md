@@ -18,8 +18,7 @@
 : 엑셀 이름 관리자를 통해 이름이 정의된 데이터 시트 양식에서 값들을 추출함
 
 #### Merge_ 타입 모듈
-  테이블 병합, 조인 등을 위한 모듈
-  
+  테이블 병합, 조인 등을 위한 모듈  
 ##### Merge_byPriority
   우선순위 병합 : 두 개의 시트를 key와 column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대해서는 입력 우선순위를 정함(한쪽이 공란인 경우는 반대쪽을 취함)
 ##### Merge_EasyLookup
@@ -27,7 +26,6 @@
 
 #### RangeOps_ 타입모듈
   range 개체 조작을 위한 모듈
-  
 ##### RangeOps_CompareValues
   두 개의 시트를 key column을 가지고 매핑하여 하나로 합치되, 겹치는 값에 대헛는 입력 우선위를 정함
 ##### RangeOps_InplaceRecursor
@@ -88,14 +86,30 @@
 
 ### Data Insight - Draft Master
 .dwg, .dxf 파일에서 텍스트 정보를 중심으로 각종 데이터를 추출하기 위한 솔루션 패키지
+
 ### Data Insight - CollabControl 
 공통기준문서나 공동작업문서의 버전관리, 변경점 공유, 백업, 로그 관리, 협업 등을 편리하게
+
 ### Data Insight - GuideBook 
 분류체계, 속성체계 등에 대한 기본 교육, 실제 사례 학습. 각종 설비(고정, 회전, 배관, 계기, 전기) 분류 등에 대한 기본 소양교육. 당사의 솔루션과 상용 제품들의 활용에 대한 교육
+
 ### Data Insight - Freeware List 
 데이터 정비 업무의 각 분야 및 문제에 적용할 수 있는 무료 소프트웨어들의 목록과 설명
+- Q-dir -> 간편한 파일, 폴더 관리 매니저
+- Everything -> 매우 빠른 파일 검색
+- nPDF -> pdf파일을 다루는 유틸리티
+
 ### Data Insight - Support Process Management
 MDM DBMS와 유사 또는 동일한 구조를 가지는 DBMS 시스템, 협업 및 태그의 추적 관리를 위한 데이터베이스, 작업용 폼 배포, 업로드, 정합성 검사
+1. PivotTables.py
+2. merge_worksheet.py
+3. process_management.py
+- class TableTransformer : 작업 프로세의 매 단계마다의 템플릿을 이전 템플릿에서 자동으로 변환함
+- class UploadValidation : db에 업로드할 데이터들에 대한 검수 로직
+- class Reporting : 주간보고, 산출물 비교(출처별 속성 내용 비교)등을 자동으로 실행함
+
+
+
 ### Data Insight - AI
 머신러닝 또는 딥러닝 기법을 응용한 솔루션
 
