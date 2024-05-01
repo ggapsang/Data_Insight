@@ -3,8 +3,9 @@ import pandas as pd
 import os
 from tqdm import tqdm
 from datetime import datetime
+import sqlite3
 
-import PivotTables as pt
+import PivotTable as pt
 
 
 class TableTransformer() :
@@ -73,7 +74,7 @@ class TableTransformer() :
         df_indiv = pd.concat([df_indiv, df_attrs], axis=1) # 속성 해더와 결합
 
         # 6. 데이터프레임 생성(6) : 'MDM 등록 여부에 N인 값들은 제외'
-        df_mdm_upload = self.df['SR No'][self.df['MDM 등록 여부']=='Y' or self.df['MDM 등록 여부']=='Y(배관)']
+        df_mdm_upload = self.df.loc[(self.df['MDM 등록 여부'] == 'Y') | (self.df['MDM 등록 여부'] == 'Y(배관)'), 'SR No']
 
         df_indiv = df_indiv[df_indiv['SR No'].isin(df_mdm_upload)]
 
@@ -156,10 +157,88 @@ class TableTransformer() :
         
         return result_df
     
-    def convert_upload_keyin(self) :
-        """태그 키인 업로드 포멧으로 데이터를 변환한다"""
-        return result_df
+
+class InsertIndiv() :
+    """개별속성 작업 템플릿으로 변환한 곳에다가"""
+    def __init__(self, conn, query, df_indiv) :
+        self.conn = conn
+        self.query = query
+        
+        self.attrs_df = pd.read_sql_query(self.query, self.conn)
+        self.df_indiv = df_indiv
+
+    def get_df(self) :
+        return self.attrs_df
     
+    def insert_primary_SrNo(self) :
+        """개별속성 작업 템플릿에 있는 SR No를 대표 키로 가져온다"""
+        df_primary_key = pd.DataFrame()
+        df_primary_key['대표'] = self.df_indiv['SR No']
+
+        series_std_key = self.df_indiv['표준데이터시트']
+        series_nonstd_key = self.df_indiv['선작업 태그']
+        series_combine = series_std_key.combine_first(series_nonstd_key)
+
+        df_primary_key['SR No'] = series_combine
+
+        self.attrs_df = pd.merge(self.attrs_df, df_primary_key, on='SR No', how='left')
+
+        return self.attrs_df
+    
+    def combine_by_priority(self, do_insert_primary_SrNo=False) :
+        """우선순위에 따라 속성값을 모아둔 시리즈를 만들고 우선순위에서 밀려난 항목들은 제거한다"""
+
+        if do_insert_primary_SrNo :
+            self.attrs_df = self.insert_primary_SrNo()
+
+        attr_std = self.attrs_df[self.attrs_df['출처']=='표준데이터시트']
+        attr_nonstd = self.attrs_df[self.attrs_df['출처']=='선작업 태그']
+        attr_eleDB = self.attrs_df[self.attrs_df['출처']=='전기설비DB']
+        attr_eleLoad = self.attrs_df[self.attrs_df['출처']=='LoadList']
+        attr_psm = self.attrs_df[self.attrs_df['출처']=='PSM']
+        
+        attr_list = [attr_eleDB, attr_std, attr_nonstd, attr_eleLoad, attr_psm]
+
+        self.attrs_df = pd.concat(attr_list, ignore_index=True)
+
+        result_df = pd.DataFrame()
+
+        for key, group in self.attrs_df.groupby('대표') :
+            valid_row = group.dropna().head(1)
+            if not valid_row.empty :
+                result_df = pd.concat([result_df, valid_row], ignore_index=True)
+            else :
+                result_df = pd.concat([result_df, group.head(1)], ignore_index=True)
+
+        return self.attrs_df
+    
+    def melt(self, df_attr_headers, do_combine_by_priority=False) :
+        
+        if do_combine_by_priority :
+            self.attrs_df = self.combine_by_priority()
+
+        attrs_df_cct_list = []
+        for index, row in df_attr_headers.iterrows() :
+            headers = row.values
+            df_attr_cct = pd.DataFrame(columns=headers)
+            attrs_df_cct = self.attrs_df[self.attrs_df['공정별 분류 코드']==df_attr_headers['공정별 분류 코드']]
+
+            pt_tb = pt.Table(attrs_df_cct)
+            melt_df_cct = pt_tb.melst()
+            df_attr_cct = pd.concat([df_attr_cct, melt_df_cct], ignore_index=True)
+            
+            attrs_df_cct_list.append(df_attr_cct)
+
+        result_df = pd.DataFrame(columns=df_attr_headers.columns)
+
+        for df in attrs_df_cct_list :
+            cols_mapping = dict(zip(df.columns, df_attr_headers.columns))
+            df = df.rename(columns = cols_mapping)
+
+            result_df = pd.concat([result_df, df], ignore_index=True)
+
+        return result_df
+
 class UploadValidation() :
         
         def __init__(self, df) :
