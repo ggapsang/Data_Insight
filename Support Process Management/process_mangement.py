@@ -246,15 +246,15 @@ class UploadValidation() :
         
         def validate_common(self) :
             """공통속성 업로드 데이터를 검증한다"""
-            return result_df
+            return 0
         
         def validate_indivi(self) :
             """개별속성 업로드 데이터를 검증한다"""
-            return result_df
+            return 0
         
         def validate_keyin(self) :
             """태그 키인 업로드 데이터를 검증한다"""
-            return result_df
+            return 0
         
 class Reporting() :
 
@@ -263,8 +263,8 @@ class Reporting() :
 
     def report_weekly(self) :
         """주간 리포트를 생성한다"""
-        return result_df
+        return 0
     
     def report_different_values(self) :
         """출처별로 차이가 나는 값들을 리포트한다"""
-        return result_df
+        return 0
