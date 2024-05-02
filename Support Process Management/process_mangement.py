@@ -15,7 +15,7 @@ class TableTransformer() :
         self.df_cct = df_cct
         self.df_indiv = df_indiv
     
-    def from_common_to_indiv(self, df_headers, df_std_ds) :
+    def from_common_to_indiv(self, df_headers, df_std_ds_cct, df_nonstd_ds_cct) : #2024.05.02 테스트 완료
         """공통속성 작업 탬플릿에서 개별속성 작업 탬플릿으로 변환한다"""
         # df_headers : 데이터 테이블 스키마 정보를 가지고 있는 해더 파일
 
@@ -34,10 +34,12 @@ class TableTransformer() :
                 continue
             
         # 2. 데이터프레임 생성(2) : '선작업 태그', '표준데이터시트' 칼럼 값 입력
-        df_std_ds =  self.df[['SRNo', '대표 SR No', 'cct']][self.df['출처']=='2.0표준']
+        df_std_ds = self.df[['SRNo', '대표 SR No', 'cct']][self.df['출처']=='2.0.표준']
         df_std_ds.rename(columns={'SRNo' : '표준데이터시트'}, inplace=True)
         df_nonstd_ds = self.df[['SRNo', '대표 SR No', 'cct']][self.df['출처']=='2.3.비표준시트_수기']
         df_nonstd_ds.rename(columns={'SRNo' : '선작업 태그'}, inplace=True)
+        df_std_ds.to_csv("log-표준.csv", encoding='cp949')
+        df_nonstd_ds.to_csv("log-비표준.csv", encoding='cp949')
 
         df_indiv = pd.merge(df_indiv, df_std_ds, left_on='SR No', right_on='대표 SR No', how='left')
         df_indiv.drop('대표 SR No', axis=1, inplace=True)
@@ -45,25 +47,39 @@ class TableTransformer() :
         df_indiv.drop('대표 SR No', axis=1, inplace=True)
 
         # 2-1. CCT 비교(표준 데이터시트는 별도의 파일에 불러 와야 함)        
-        series_std = df_std_ds['C|C|T']
-        series_nonstd = df_indiv['cct_y']
-        df_indiv['비교'] = series_std.combine_first(series_nonstd)
-        df_indiv.drop('cct_x', axis=1, inplace=True)
-        df_indiv.drop('cct_y', axis=1, inplace=True)
+        df_std_ds_cct = df_std_ds_cct[['SR No', 'C|C|T']]
+        df_nonstd_ds_cct = df_nonstd_ds_cct[['New SR No', 'CCT']]
+
+        df_indiv = pd.merge(df_indiv, df_std_ds_cct, left_on='표준데이터시트', right_on='SR No', how='left')
+        df_indiv = pd.merge(df_indiv, df_nonstd_ds_cct, left_on='선작업 태그', right_on='New SR No', how='left')
+
+        # series_std = df_std_ds_cct['C|C|T']
+        # series_nonstd = df_indiv['CCT']
+        # df_indiv.to_csv("log_df_indiv.csv", encoding='cp949')
+        df_indiv['비교'] = df_indiv['C|C|T'].combine_first(df_indiv['CCT'])
+        # print(df_indiv)
+
+        df_indiv.drop('C|C|T', axis=1, inplace=True)
+        df_indiv.drop('CCT', axis=1, inplace=True)
+        df_indiv.drop('SR No_y', axis=1, inplace=True)
+        df_indiv.rename(columns={'SR No_x' : 'SR No'}, inplace=True)
 
         # 3. 데이터프레임 생성(3) : CCT 매핑 : 작업템플릿 + CCT(분류체계) LEFT JOIN
-        df_indiv = pd.merge(df_indiv, self.df_cct, left_on='타입', right_on='LV6.3_TYPE (DESCRIPTION)')
-        df_indiv.rename(columns={'LV6.1_CATEGORY (DESCRIPTION)' : '카테고리', 'LV6.2_CLASS (DESCRIPTION)' : '클래스', 'LV6.3_TYPE (DESCRIPTION)' : '타입'}, inplace=True)
+        df_indiv = pd.merge(df_indiv, self.df_cct, left_on='타입', right_on='LV6.3_TYPE (DESCRIPTION)', how='left')
+        df_indiv.drop(columns='LV6.3_TYPE (DESCRIPTION)')
+        df_indiv.rename(columns={'LV6.1_CATEGORY (DESCRIPTION)' : '카테고리', 'LV6.2_CLASS (DESCRIPTION)' : '클래스'}, inplace=True)
 
-        # 4. 데이터프레임 생성(4) : '속성 그룹 코드', '최종 CCT 변경 유무' 칼럼 추가
+        # 4. 데이터프레임 생성(4) : '작업자', '속성 그룹 코드', '최종 CCT 변경 유무', '비고' 칼럼 추가
         df_indiv['속성 그룹 코드'] = '03_DATA'
+        df_indiv['작업자'] = None
+        df_indiv['비고'] = None
 
         def compare_or_nan(row, col_nm_1, col_nm_2) :
             """두 칼럼의 값이 같은지 비교하고, 둘 중 하나라도 NaN이면 NaN을 반환한다"""
             if pd.isna(row[col_nm_1]) or pd.isna(row[col_nm_2]) :
                 return np.nan
             else :
-                return(row[col_nm_1] == row[col_nm_2] )
+                return(row[col_nm_1] != row[col_nm_2] )
 
         df_indiv['최종 CCT 변경 유무'] = df_indiv.apply(lambda x : compare_or_nan(x, col_nm_1='비교', col_nm_2='C|C|T'), axis=1)
 
@@ -73,10 +89,29 @@ class TableTransformer() :
 
         df_indiv = pd.concat([df_indiv, df_attrs], axis=1) # 속성 해더와 결합
 
-        # 6. 데이터프레임 생성(6) : 'MDM 등록 여부에 N인 값들은 제외'
-        df_mdm_upload = self.df.loc[(self.df['MDM 등록 여부'] == 'Y') | (self.df['MDM 등록 여부'] == 'Y(배관)'), 'SR No']
+        # 6. 데이터프레임 생성(6) : 'MDM 반영 여부'에 N인 값들은 제외
+        df_mdm_upload = self.df.loc[(self.df['MDM 반영 여부'] == 'Y') | (self.df['MDM 반영 여부'] == 'Y(배관)'), 'SRNo']
 
+        # print(df_indiv.columns.to_list())
         df_indiv = df_indiv[df_indiv['SR No'].isin(df_mdm_upload)]
+
+        # 7. df_common과 한번 더 left join
+        df_common_cct = self.df[['SRNo', 'CATEGORY', 'CLASS', 'TYPE']]
+        df_indiv = pd.merge(df_indiv, df_common_cct, left_on='SR No', right_on='SRNo', how='left')
+        df_indiv.drop('카테고리', axis=1, inplace=True)
+        df_indiv.drop('클래스', axis=1, inplace=True)
+        df_indiv.drop('타입', axis=1, inplace=True)
+        df_indiv.drop('SRNo', axis=1, inplace=True)
+
+        df_indiv.rename(columns={'CATEGORY' : '카테고리', 'CLASS' : '클래스', 'TYPE' : '타입'}, inplace=True)
+
+        # 8. 2에서 left join으로 1:n 매핑된 값들중 하나만 남기고 제거
+        df_indiv.drop_duplicates('SR No', inplace=True)
+
+        # 9. 해더 열 순서 정렬
+        order_list = df_headers['개별속성 작업 해더'].to_list()
+
+        df_indiv = df_indiv[order_list]
 
         return df_indiv
 
@@ -159,7 +194,7 @@ class TableTransformer() :
     
 
 class InsertIndiv() :
-    """개별속성 작업 템플릿으로 변환한 곳에다가"""
+    """개별속성 작업 템플릿으로 변환한 곳에다 선작업한 속성값들을 우선순위에 따라 반영한다"""
     def __init__(self, conn, query, df_indiv) :
         self.conn = conn
         self.query = query
