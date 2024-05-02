@@ -115,7 +115,7 @@ class TableTransformer() :
 
         return df_indiv
 
-    def to_upload_common(self, headers) :
+    def to_upload_common(self, headers : list) :
         """개별속성 작업 템플릿에서 공통속성을 업로드할 포멧으로 데이터를 변환한다"""
         
         result_df = self.df[self.df['속성 그룹 코드']==('03_DATA' or '04_TBD')]
@@ -126,6 +126,8 @@ class TableTransformer() :
         except :
             print("e")
         
+        result_df.drop('속성그룹코드', axis=1, inplace=True)
+
         return result_df
 
     def to_upload_indiv(self, drop_list) :
