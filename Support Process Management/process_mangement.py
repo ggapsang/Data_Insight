@@ -126,7 +126,7 @@ class TableTransformer() :
         except :
             print("e")
         
-        result_df.drop('속성그룹코드', axis=1, inplace=True)
+        result_df.drop('속성 그룹 코드', axis=1, inplace=True)
 
         return result_df
 
