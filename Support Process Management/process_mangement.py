@@ -120,52 +120,53 @@ class TableTransformer() :
         
         result_df = self.df[self.df['속성 그룹 코드']==('03_DATA' or '04_TBD')]
         result_df = result_df[headers]
-        try :
-            result_df = result_df.rename(columns = {'공정' : '공정번호', '공정별 분류 코드' : '공종별분류코드'})
-            result_df = result_df.astype({'공정번호' : str})
-        except :
-            print("e")
+
+        result_df.rename(columns = {'공정' : '공정번호', 'SR No' : 'SRNo', 'Tag No' : 'TagNo', 'Tag No 수정' : 'TagNo수정', '공정별 분류 코드' : '공종별분류코드'}, inplace=True)
+        result_df = result_df.astype({'공정번호' : str})
         
         result_df.drop('속성 그룹 코드', axis=1, inplace=True)
 
         return result_df
 
-    def to_upload_indiv(self, drop_list) :
+    def to_upload_indiv(self, drop_list) : #20240503 테스트 완료
         """개별속성 작업 템플릿에서 개별속성을 업로드할 포멧으로 데이터를 변환한다"""
         
         # "2. upload dataform 으로 변환" 부분에서 사용함
-        def get_upload_single_df(single_cct) :
+        def get_upload_single_df(df_cct) :
             """하나의 업로드 형식 테이블 완성"""
     
             #### filtered table
-            df_header = single_cct[single_cct['속성 그룹 코드']=='01_속성명']
-            df_vals = single_cct[single_cct['속성 그룹 코드']=='03_DATA']
+            df_header = df_cct[df_cct['속성 그룹 코드']=='01_속성명']
+            df_vals = df_cct[df_cct['속성 그룹 코드']=='03_DATA']
+            df_cct.drop('속성 그룹 코드', axis=1, inplace=True)
             df_header.drop('속성 그룹 코드', axis=1, inplace=True)
             df_vals.drop('속성 그룹 코드', axis=1, inplace=True)
+
     
-            #### 새 해더 이름
+            #### 해더 이름 새로 매핑
             header = df_header.iloc[0].dropna()
             header = header.to_list()
-            del header[1:3]
+            head_len = len(header)
+            df_header_common = df_cct.iloc[:, :head_len]
+            header_common = df_header_common.columns.to_list()
+            new_nm_cols = dict(zip(header_common, header))
     
+
             #### 속성값 부분 편집
             df_left = df_vals[['SR No', '공정', '공정별 분류 코드']]
     
-            df_right = df_vals[[col for col in df_vals.columns.to_list() if col not in ['공정', '공정별 분류 코드']]]
+            df_right = df_vals[[col for col in df_vals.columns.to_list() if col not in ['공정', '공정별 분류 코드', '출처']]] #출처 추가
             head_len = len(header)
             df_right = df_right.iloc[:, :head_len]
 
-            df_right_cols = df_vals.columns.to_list()
-            new_nm_cols = dict(zip(df_right_cols, header))
-
             df_right.rename(columns = new_nm_cols, inplace=True)
     
-            tb = pt.Table(df_right)
-            pivot_df = tb.melst()
+            pivot_df =df_right.melt(id_vars='SR No', var_name='속성명', value_name='속성값', ignore_index=False)
+            pivot_df = pivot_df.dropna(subset=['속성값'])
     
             upload_df = pd.merge(left=pivot_df, right=df_left, how='left', on='SR No')
             upload_df = upload_df[['공정', 'SR No', '공정별 분류 코드', '속성명', '속성값']]# 칼럼 순서 변경
-    
+
             return upload_df
         
         
@@ -181,19 +182,23 @@ class TableTransformer() :
         for cct_code in tqdm(cct_codes) :
     
             df_cct = df_2[df_2['공정별 분류 코드']==cct_code]
-    
-            upload_df = get_upload_single_df(df_cct)
+
+            try :
+                upload_df = get_upload_single_df(df_cct)
+            except :
+                print(cct_code)
             upload_dfs.append(upload_df)
     
         ## 통합 업로드 파일
         result_df = pd.concat(upload_dfs, ignore_index=True)
-        result_df.rename(columns = {'공정':'공정번호'})
+        result_df.rename(columns = {'공정':'공정번호', '공정별 분류 코드':'공종별분류코드'}, inplace=True)
             
         result_df['출처'] = None
         result_df['상태'] = '업로드 대기'
+
+        result_df = result_df[result_df['공종별분류코드'] != result_df['속성명']]
         
         return result_df
-    
 
 class InsertIndiv() :
     """개별속성 작업 템플릿으로 변환한 곳에다 선작업한 속성값들을 우선순위에 따라 반영한다"""
@@ -276,6 +281,8 @@ class InsertIndiv() :
 
         return result_df
 
+
+"""미구현"""
 class UploadValidation() :
         
         def __init__(self, df) :
