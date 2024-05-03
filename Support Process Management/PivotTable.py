@@ -12,6 +12,7 @@ class Table() :
     def melst(self) :
         melted_df = self.df.melt(id_vars='SR No', 
                       var_name='속성명', 
-                      value_name='속성값').dropna(subset=['속성값'])
+                      value_name='속성값')
+        melted_df.dropna(subset=['속성값'], inplace=True)
 
         return melted_df
