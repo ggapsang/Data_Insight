@@ -4,8 +4,8 @@ class Table() :
     def __init__(self, df) :
         self.df = df
 
-    def convert(self) :
-        pivot_df = self.df.pivot(index='SR No', columns='COL', values='VALUE') 
+    def convert_pivot(self) :
+        pivot_df = self.df.pivot(index='SRNo', columns='속성명', values='속성값') 
         
         return pivot_df
     
