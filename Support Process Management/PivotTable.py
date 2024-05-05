@@ -5,7 +5,8 @@ class Table() :
         self.df = df
 
     def convert_pivot(self) :
-        pivot_df = self.df.pivot(index='SRNo', columns='속성명', values='속성값') 
+        pivot_df = self.df.pivot(index='SRNo', columns='속성명', values='속성값')
+        pivot_df.reset_index(inplace=True)
         
         return pivot_df
     
