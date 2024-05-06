@@ -104,12 +104,14 @@ MDM DBMS와 유사 또는 동일한 구조를 가지는 DBMS 시스템, 협업 �
 1. PivotTables.py
 2. merge_worksheet.py
 3. process_management.py
-- class TableTransformer : 작업 프로세의 매 단계마다의 템플릿을 이전 템플릿에서 자동으로 변환함
-- class UploadValidation : db에 업로드할 데이터들에 대한 검수 로직
-- class Reporting : 주간보고, 산출물 비교(출처별 속성 내용 비교)등을 자동으로 실행함
-
+- class TableTransformer : 작업 프로세의 매 단계마다의 템플릿을 이전 템플릿에서 자동으로 변환
+- class ReadDB : sqlite3 파일에서부터 필요한 테이블을 읽어와 DataFrame으로 변환
+- class InsertAttrsPreprocessing : 개별속성 작업 템플릿에 데이터를 입력하기 전에 전처리를 수행함
+- class InsertAttrsPipeline : sqlite db에서 가져와 df로 바꾼 데이터들을 개별속성 작업 템플릿에 입력
+: ReadDB -> InsertAttrsPreprocessing -> InsertAttrsPipeline
 
 
 ### Data Insight - AI
 머신러닝 또는 딥러닝 기법을 응용한 솔루션
+1. meerkat : line no의 주요 속성값들을 분리해낸다
 
