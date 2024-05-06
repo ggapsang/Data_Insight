@@ -272,15 +272,20 @@ class InsertAttrsPipeline() :
         self.df_working_filtered = self.df_working_f[self.df_working_f['공종별 분류 코드']==self.type_code]
 
         attrs_columns = self.df_attrs_headers.iloc[i].to_list()
+
         self.df_cct = pd.DataFrame(columns=attrs_columns)
+        self.df_cct = self.df_cct.loc[:, self.df_cct.columns.notnull()]
 
         return self
     
     def loop_step2(self) :
         """개별속성 테이블 피벗 준비"""
 
-        self.df_attrs_filtered = self.df_attrs[['대표 SRNo', '속성명', '속성값']]
+        self.df_attrs_filtered = self.df_attrs[['대표 SRNo', '속성명', '속성값', '공종별분류코드']]
+        self.df_attrs_filtered = self.df_attrs_filtered[self.df_attrs_filtered['공종별분류코드']==self.type_code]
+
         self.df_attrs_filtered.rename(columns={'대표 SRNo' : 'SRNo'}, inplace=True)
+        self.df_attrs_filtered.drop('공종별분류코드', axis=1, inplace=True)
 
         return self
     
@@ -294,8 +299,9 @@ class InsertAttrsPipeline() :
 
     def loop_step4(self) :
         """빈 df_cct 데이터프레임과 합침"""
-
-        self.df_cct_result = pd.concat([self.df_cct, self.df_tb], axis=0)
+        
+        self.df_cct_result = pd.DataFrame()
+        self.df_cct_result = pd.concat([self.df_cct, self.df_tb], axis=0, ignore_index=True)
 
         return self
     
