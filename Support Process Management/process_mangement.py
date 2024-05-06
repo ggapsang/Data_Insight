@@ -222,14 +222,18 @@ class ReadDB() :
         return df
 
 class InsertAttrstPreprocessing() :
+    """개별속성 작업 템플릿에 데이터를 입력하기 전에 전처리를 수행한다"""
+    
     def __init__(self, df_working_f, df_attrs_headers) :
         self.df_working_f = df_working_f
         self.df_attrs_headers = df_attrs_headers[df_attrs_headers['속성 그룹 코드']=='01_속성명']
 
     def step0_1(self) :
-        """"df_working_f에서 ['표준데이터시트', '선작업 태그'] 칼럼의 값을 보충한다"""
-        self.df_working_f['표준데이터시트'] = self.df_working_f.apply(lambda x : x['SR No'] if x['표준데이터시트'] != np.nan and x['출처'] =='표준' else x['표준데이터시트'], axis=1)
-        self.df_working_f['선작업 태그'] = self.df_working_f.apply(lambda x : x['SR No'] if x['선작업 태그'] != np.nan and x['출처'] =='비표준' else x['선작업 태그'], axis=1)
+        """"df_working_f에서 ['표준데이터시트', '선작업데이터'] 칼럼의 값을 보충한다"""
+
+        self.df_working_f['표준데이터시트'] = self.df_working_f.apply(lambda x : x['SRNo'] if x['표준데이터시트'] != np.nan and x['출처'] =='표준' else x['표준데이터시트'], axis=1)
+
+        self.df_working_f['선작업데이터'] = self.df_working_f.apply(lambda x : x['SRNo'] if x['선작업데이터'] != np.nan and x['출처'] =='비표준' else x['선작업데이터'], axis=1)
 
         return self
     
@@ -250,7 +254,7 @@ class InsertAttrstPreprocessing() :
 
         return self
 
-class InsertAttrstPipeline() :
+class InsertAttrsPipeline() :
     """sqlite db에서 가져와 df로 바꾼 데이터들을 개별속성 작업 템플릿에 입력"""
 
     def __init__(self, df_working_f, df_attrs, df_attrs_headers) :
@@ -261,11 +265,11 @@ class InsertAttrstPipeline() :
     def loop_step1(self, i) :
         """해더 파일에서 공종별 분류 코드를 하나 가져온다"""
 
-        self.type_code = self.df_attrs_headers['공통속성 작업 해더 매핑'][i]
+        self.type_code = self.df_attrs_headers['공종별 분류 코드'][i]
 
         # df_working_filtered
         self.df_working_filtered = self.df_working_f[self.df_working_f['속성 그룹 코드']==self.type_code] == '03_DATA'
-        self.df_working_filtered = self.df_working_f[self.df_working_f['타입']==self.type_code]
+        self.df_working_filtered = self.df_working_f[self.df_working_f['공종별 분류 코드']==self.type_code]
 
         attrs_columns = self.df_attrs_headers.iloc[i].to_list()
         self.df_cct = pd.DataFrame(columns=attrs_columns)
@@ -297,7 +301,7 @@ class InsertAttrstPipeline() :
     
     def loop_step5(self) :
         """피벗팅하여 입력한 속성값과 df_working_f에 있는 정보들을 합침"""
-        common_columns = self.df_cct_result.columns.intersection(self.df_attrs_header.columns)
+        common_columns = self.df_cct_result.columns.intersection(self.df_attrs_headers.columns)
         self.df_cct_result = pd.merge(self.df_cct_result, self.df_working_filtered[common_columns], how='left', on='SRNo')
         
         for col in self.df_cct_result.columns :
@@ -314,7 +318,7 @@ class InsertAttrstPipeline() :
     def loop_step6(self) :
         """공종별 분류 코드, 속성 그룹 코드 추가"""
 
-        self.df_cct_result['공정별 분류 코드'] = self.type_code
+        self.df_cct_result[self.type_code] = self.type_code
         self.df_cct_result['01_속성명'] = '03_DATA'
 
         return self
@@ -341,6 +345,7 @@ class InsertAttrstPipeline() :
         
         self.df_cct_result = make_header_to_firts_row(self.df_cct_result)
         main_header = cut_header(self.df_working_filtered, self.df_cct_result)
+
         self.df_cct_result = change_header(self.df_cct_result, main_header)
 
         return self
