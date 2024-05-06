@@ -199,116 +199,160 @@ class TableTransformer() :
         result_df = result_df[result_df['공종별분류코드'] != result_df['속성명']]
         
         return result_df
-
-class InsertIndiv() :
-    """개별속성 작업 템플릿으로 변환한 곳에다 선작업한 속성값들을 우선순위에 따라 반영한다"""
-    def __init__(self, conn, query, df_indiv) :
-        self.conn = conn
-        self.query = query
-        
-        self.attrs_df = pd.read_sql_query(self.query, self.conn)
-        self.df_indiv = df_indiv
-
-    def get_df(self) :
-        return self.attrs_df
     
-    def insert_primary_SrNo(self) :
-        """개별속성 작업 템플릿에 있는 SR No를 대표 키로 가져온다"""
-        df_primary_key = pd.DataFrame()
-        df_primary_key['대표'] = self.df_indiv['SR No']
+    def help(self) :
+        print("from_common_to_indiv : 공통속성 작업 탬플릿에서 개별속성 작업 탬플립으로 변환")
+        print("to_upload_common : 개별속성 작업 템플릿에서 공통속성을 업로드할 포멧으로 데이터를 변환")
+        print("to_upload_indiv : 개별속성 작업 템플릿에서 개별속성을 업로드할 포멧으로 데이터를 변환")
+        print("help : 도움말 출력")
 
-        series_std_key = self.df_indiv['표준데이터시트']
-        series_nonstd_key = self.df_indiv['선작업 태그']
-        series_combine = series_std_key.combine_first(series_nonstd_key)
+class ReadDB() :
+    """SQLite DB에서 데이터를 읽어와 데이터프레임으로 변환한다"""
 
-        df_primary_key['SR No'] = series_combine
+    def __init__(self, db_path) :
+        self.db_path = db_path
 
-        self.attrs_df = pd.merge(self.attrs_df, df_primary_key, on='SR No', how='left')
+    def read_db_to_dataframe(self, table_name) :
+        """DB에서 데이터를 불러와 데이터프레임으로 변환한다"""
+        conn = sqlite3.connect(self.db_path)
+        query = f"SELECT * FROM {table_name}"
+        df = pd.read_sql_query(query, conn)
+        conn.close()
 
-        return self.attrs_df
+        return df
+
+class InsertAttrstPreprocessing() :
+    def __init__(self, df_working_f, df_attrs_headers) :
+        self.df_working_f = df_working_f
+        self.df_attrs_headers = df_attrs_headers[df_attrs_headers['속성 그룹 코드']=='01_속성명']
+
+    def step0_1(self) :
+        """"df_working_f에서 ['표준데이터시트', '선작업 태그'] 칼럼의 값을 보충한다"""
+        self.df_working_f['표준데이터시트'] = self.df_working_f.apply(lambda x : x['SR No'] if x['표준데이터시트'] != np.nan and x['출처'] =='표준' else x['표준데이터시트'], axis=1)
+        self.df_working_f['선작업 태그'] = self.df_working_f.apply(lambda x : x['SR No'] if x['선작업 태그'] != np.nan and x['출처'] =='비표준' else x['선작업 태그'], axis=1)
+
+        return self
     
-    def combine_by_priority(self, do_insert_primary_SrNo=False) :
-        """우선순위에 따라 속성값을 모아둔 시리즈를 만들고 우선순위에서 밀려난 항목들은 제거한다"""
+    def step0_2(self, df_attrs, col_name='표준데이터시트') :
+        """개별속성 테이블에 대표 SRNo를 추가한다"""
 
-        if do_insert_primary_SrNo :
-            self.attrs_df = self.insert_primary_SrNo()
+        def get_representative_srno(df_base, df_right, lookup_columns) :
+            df_right_join = df_right[['SRNo', lookup_columns]]
+            df_merge = pd.merge(df_base, df_right_join, how='left', left_on='SRNo', right_on=lookup_columns)
+            df_merge.drop(lookup_columns, axis=1, inplace=True)
+            df_merge.rename(columns={'SRNo_x' : 'SRNo', 'SRNo_y':'대표 SRNo'}, inplace=True)
+            return df_merge
 
-        attr_std = self.attrs_df[self.attrs_df['출처']=='표준데이터시트']
-        attr_nonstd = self.attrs_df[self.attrs_df['출처']=='선작업 태그']
-        attr_eleDB = self.attrs_df[self.attrs_df['출처']=='전기설비DB']
-        attr_eleLoad = self.attrs_df[self.attrs_df['출처']=='LoadList']
-        attr_psm = self.attrs_df[self.attrs_df['출처']=='PSM']
-        
-        attr_list = [attr_eleDB, attr_std, attr_nonstd, attr_eleLoad, attr_psm]
+        self.df_attrs = df_attrs
 
-        self.attrs_df = pd.concat(attr_list, ignore_index=True)
+        self.df_attrs = get_representative_srno(self.df_attrs, self.df_working_f, col_name)
+        self.df_attrs.dropna(subset=['대표 SRNo'], inplace=True)
 
-        result_df = pd.DataFrame()
+        return self
 
-        for key, group in self.attrs_df.groupby('대표') :
-            valid_row = group.dropna().head(1)
-            if not valid_row.empty :
-                result_df = pd.concat([result_df, valid_row], ignore_index=True)
-            else :
-                result_df = pd.concat([result_df, group.head(1)], ignore_index=True)
+class InsertAttrstPipeline() :
+    """sqlite db에서 가져와 df로 바꾼 데이터들을 개별속성 작업 템플릿에 입력"""
 
-        return self.attrs_df
+    def __init__(self, df_working_f, df_attrs, df_attrs_headers) :
+        self.df_working_f = df_working_f
+        self.df_attrs_headers = df_attrs_headers
+        self.df_attrs = df_attrs
+
+    def loop_step1(self, i) :
+        """해더 파일에서 공종별 분류 코드를 하나 가져온다"""
+
+        self.type_code = self.df_attrs_headers['공통속성 작업 해더 매핑'][i]
+
+        # df_working_filtered
+        self.df_working_filtered = self.df_working_f[self.df_working_f['속성 그룹 코드']==self.type_code] == '03_DATA'
+        self.df_working_filtered = self.df_working_f[self.df_working_f['타입']==self.type_code]
+
+        attrs_columns = self.df_attrs_headers.iloc[i].to_list()
+        self.df_cct = pd.DataFrame(columns=attrs_columns)
+
+        return self
     
-    def melt(self, df_attr_headers, do_combine_by_priority=False) :
-        
-        if do_combine_by_priority :
-            self.attrs_df = self.combine_by_priority()
+    def loop_step2(self) :
+        """개별속성 테이블 피벗 준비"""
 
-        attrs_df_cct_list = []
-        for index, row in df_attr_headers.iterrows() :
-            headers = row.values
-            df_attr_cct = pd.DataFrame(columns=headers)
-            attrs_df_cct = self.attrs_df[self.attrs_df['공정별 분류 코드']==df_attr_headers['공정별 분류 코드']]
+        self.df_attrs_filtered = self.df_attrs[['대표 SRNo', '속성명', '속성값']]
+        self.df_attrs_filtered.rename(columns={'대표 SRNo' : 'SRNo'}, inplace=True)
 
-            pt_tb = pt.Table(attrs_df_cct)
-            melt_df_cct = pt_tb.melst()
-            df_attr_cct = pd.concat([df_attr_cct, melt_df_cct], ignore_index=True)
-            
-            attrs_df_cct_list.append(df_attr_cct)
-
-        result_df = pd.DataFrame(columns=df_attr_headers.columns)
-
-        for df in attrs_df_cct_list :
-            cols_mapping = dict(zip(df.columns, df_attr_headers.columns))
-            df = df.rename(columns = cols_mapping)
-
-            result_df = pd.concat([result_df, df], ignore_index=True)
-
-        return result_df
-
-
-"""미구현"""
-class UploadValidation() :
-        
-        def __init__(self, df) :
-            self.df = df
-        
-        def validate_common(self) :
-            """공통속성 업로드 데이터를 검증한다"""
-            return 0
-        
-        def validate_indivi(self) :
-            """개별속성 업로드 데이터를 검증한다"""
-            return 0
-        
-        def validate_keyin(self) :
-            """태그 키인 업로드 데이터를 검증한다"""
-            return 0
-        
-class Reporting() :
-
-    def __init__(self, df) :
-        self.df = df
-
-    def report_weekly(self) :
-        """주간 리포트를 생성한다"""
-        return 0
+        return self
     
-    def report_different_values(self) :
-        """출처별로 차이가 나는 값들을 리포트한다"""
-        return 0
+    def loop_step3(self) :
+        """개별속성 테이블 피벗팅"""
+
+        tb = pt.Table(self.df_attrs_filtered)
+        self.df_tb = tb.convert_pivot()
+
+        return self
+
+    def loop_step4(self) :
+        """빈 df_cct 데이터프레임과 합침"""
+
+        self.df_cct_result = pd.concat([self.df_cct, self.df_tb], axis=0)
+
+        return self
+    
+    def loop_step5(self) :
+        """피벗팅하여 입력한 속성값과 df_working_f에 있는 정보들을 합침"""
+        common_columns = self.df_cct_result.columns.intersection(self.df_attrs_header.columns)
+        self.df_cct_result = pd.merge(self.df_cct_result, self.df_working_filtered[common_columns], how='left', on='SRNo')
+        
+        for col in self.df_cct_result.columns :
+            if '_x' in str(col) :
+                self.df_cct_result.drop(col, axis=1, inplace=True)
+            elif '_y' in str(col) :
+                self.df_cct_result.rename(columns={col : col.replace('_y', '')}, inplace=True)
+        
+        # 열 순서 정렬
+        self.df_cct_result = self.df_cct_result[self.df_cct.columns.to_list()]
+
+        return self
+    
+    def loop_step6(self) :
+        """공종별 분류 코드, 속성 그룹 코드 추가"""
+
+        self.df_cct_result['공정별 분류 코드'] = self.type_code
+        self.df_cct_result['01_속성명'] = '03_DATA'
+
+        return self
+    
+    def loop_step7(self) :
+        """해더 정리"""
+
+        def make_header_to_firts_row(df) :
+            """해더를 첫번째 행으로 이동"""
+            header_df = pd.DataFrame([df.columns.tolist()], columns=df.columns)
+            new_df = pd.concat([header_df, df], ignore_index=True)
+            return new_df
+        
+        def cut_header(df, df_cut) :
+            """해더 길이 맞추기"""
+            main_header = df.columns.to_list()
+            main_header = main_header[: len(df_cut.columns.to_list())]
+            return main_header
+
+        def change_header(df, main_header) :
+            """메인 해더로 해더 이름 바꾸기"""
+            df.columns = main_header
+            return df
+        
+        self.df_cct_result = make_header_to_firts_row(self.df_cct_result)
+        main_header = cut_header(self.df_working_filtered, self.df_cct_result)
+        self.df_cct_result = change_header(self.df_cct_result, main_header)
+
+        return self
+    
+    def excute(self, i) :
+        """실행"""
+        self.loop_step1(i)
+        self.loop_step2()
+        self.loop_step3()
+        self.loop_step4()
+        self.loop_step5()
+        self.loop_step6()
+        self.loop_step7()
+
+        return self.df_cct_result
