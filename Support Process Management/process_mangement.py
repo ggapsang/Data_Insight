@@ -280,7 +280,7 @@ class InsertAttrsPipeline() :
         return self
     
     def step2(self) :
-        """'SRNo', '속성값', '속성'만 남기고 정리한다"""
+        """개별속성 테이블에서 'SRNo', '속성값', '속성'(속성순번)만 남기고 정리한다"""
         self.df_attrs_add_filtered = self.df_attrs_add[['SRNo', '속성값', '속성']]
 
         return self
@@ -310,7 +310,7 @@ class InsertAttrsPipeline() :
         return self
 
     
-    def excute(self, i) :
+    def excute(self) :
         """실행"""
         self.step1()
         self.step2()
@@ -319,3 +319,13 @@ class InsertAttrsPipeline() :
         self.step5()
 
         return self.result_df
+
+    def help(self) :
+        """매서드 도움말 출력"""
+        print(".step1() : df_attrs(개별속성 데이터 테이블)에 공종별분류코드+속성명을 기준으로 속성 순번을 매핑한다")
+        print(".step2() : 개별속성 테이블에서 'SRNo', '속성값', '속성'(속성순번)만 남기고 정리한다")
+        print(".step3() : 중복 값이 있을 경우 제거한다")
+        print(".step4() : 속성순번(속성)을 가지고 피벗팅")
+        print(".step5() : working_file에 반영 후 해더 다시 정비")
+        print(".help() : 매서드 도움말 출력")
+        
