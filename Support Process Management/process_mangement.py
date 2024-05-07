@@ -291,12 +291,12 @@ class InsertAttrsPipeline() :
     
         return self
 
-    def step4(self) :
+    def step4(self, rename_col="표준데이터시트") :
         """속성순번(속성)을 가지고 피벗팅"""
         self.pivot_df = self.df_attrs_add_filtered.pivot(index='SRNo', columns='속성', values='속성값')
         self.pivot_df.reset_index(inplace=True)
 
-        self.pivot_df.rename(columns={'SRNo' : '표준데이터시트'}, inplace=True)
+        self.pivot_df.rename(columns={'SRNo' : rename_col}, inplace=True)
 
         return self
     
