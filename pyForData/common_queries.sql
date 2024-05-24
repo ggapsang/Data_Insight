@@ -1,0 +1,25 @@
+/*examlple
+SR No, Col, Value
+1, A, 2
+1, B, 34
+1, C, 51
+1, D, 3
+2, E
+2, A, 12
+2, B, 2
+*/
+
+-- SQLite pivot Table
+
+CREATE VIEW pivoted_table AS
+SELECT 
+  SR_No,
+  MAX(CASE WHEN COL = 'A' THEN VALUE ELSE NULL END) AS A,
+  MAX(CASE WHEN COL = 'B' THEN VALUE ELSE NULL END) AS B,
+  MAX(CASE WHEN COL = 'C' THEN VALUE ELSE NULL END) AS C,
+  MAX(CASE WHEN COL = 'D' THEN VALUE ELSE NULL END) AS D,
+  MAX(CASE WHEN COL = 'E' THEN VALUE ELSE NULL END) AS E
+FROM 
+  your_table_name
+GROUP BY 
+  SR_No;
