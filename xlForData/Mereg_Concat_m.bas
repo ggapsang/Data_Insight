@@ -19,7 +19,7 @@ Sub ConsolidateSelectedSheets()
     ' 사용자가 통합할 시트를 선택하도록 메시지 박스를 표시
     For Each ws In ThisWorkbook.Worksheets
         If ws.Name <> masterWs.Name Then
-            response = MsgBox("시트를 통합하시겠습니까? " & ws.Name, vbYesNo)
+            response = MsgBox(ws.Name & "시트를 통합하시겠습니까? " , vbYesNo)
             If response = vbYes Then
                 selectedSheets.Add ws.Name
             End If
@@ -40,5 +40,5 @@ Sub ConsolidateSelectedSheets()
         End With
     Next wsName
 
-    MsgBox "선택한 시트 통합 완료!"
+    MsgBox "통합 완료"
 End Sub
