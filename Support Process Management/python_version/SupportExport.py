@@ -66,7 +66,6 @@ class MeltingData() :
 
         self.df_attrs = pd.concat(results, ignore_index=True)
 
-
     def step5(self, key_col='SR No') :
         """merge common dataframe and attribute dataframe : 공통 데이터프레임과 개별속성 데이터프레임 병합"""
         self.df_indiv = pd.merge(self.df_attrs, self.df_common, on=key_col, how='left')
@@ -149,7 +148,8 @@ class MeltingData() :
         print('step7() : drop dumb value : Dumb 값 제거')
         print('step8() : key 값 생성 및 기타 칼럼 생성')
         print('step9() : 공통 파일 생성')
-        print('execute() : run all steps')
+        print('step10() : 중복 key 값이 있는 경우 표시함')
+        print('std_execute() : run all steps')
 
     def show_attributes(self):
         # 인스턴스 속성
