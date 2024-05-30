@@ -1,0 +1,38 @@
+cct_path = os.path.join(os.getcwd(), 'cct_dict_240529.json')
+with open(cct_path, 'r', encoding='utf8') as f:
+    dic_cct = json.load(f)
+
+## step 0 : define the path of the data
+today = datetime.today().strftime("%Y%m%d")
+f_name = input("file name")
+save_f_name = input("save_f_name : ")
+
+data_path = os.path.join(os.getcwd(), 'working_file')
+data_f_path = os.path.join(data_path, f'{f_name}.csv')
+result_path = os.path.join(os.getcwd(), 'results')
+
+# df_cct_attrs_count = pd.read_csv(os.path.join(data_path, "속성갯수.csv"))
+# df = pd.read_csv(os.path.join(data_path, data_f_path, encoding='utf8'))
+# dic_cct= get_cct_dictionary(df, df_cct_attrs_count, attr_nm='개별속성1')
+
+melting_data = MeltingData(data_f_path, dic_cct=dic_cct)
+melting_data.help()
+
+melting_data.step1()
+melting_data.step2()
+melting_data.step3()
+melting_data.step4()
+melting_data.step5()
+melting_data.step6()
+melting_data.step7()
+melting_data.step8()
+melting_data.step9()
+melting_data.step10()
+melting_data.show_attributes()
+
+melting_data.df_duple_key
+
+df_result = melting_data.df_result
+df_result.head()
+
+df_result.to_csv(os.path.join(result_path, f"{save_f_name}_{today}.csv"), index=False)
