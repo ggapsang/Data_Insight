@@ -73,4 +73,14 @@ Function ExtractSheetName(ref As String) As String
     
 End Function
 
-
+''' 이름이 이미 존재하는지 확인
+Private Function IsInCollection(col As Collection, val As Variant) As Boolean
+    Dim item As Variant
+    IsInCollection = False
+    For Each item In col
+        If item = val Then
+            IsInCollection = True
+            Exit For
+        End If
+    Next item
+End Function
