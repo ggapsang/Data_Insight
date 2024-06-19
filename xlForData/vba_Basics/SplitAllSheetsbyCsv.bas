@@ -2,15 +2,14 @@ Sub SaveAllSheetsAsCSV()
     Dim ws As Worksheet
     Dim csvFolderPath As String
     Dim wb As Workbook
-    Dim tempWb As Workbook
     Dim folderName As String
     Dim fso As Object
     Dim fileName As String
-    Dim tempWs: Worksheet
-    Dim i As Integer
     
     Dim totalSheet As Integer
     Dim currentSheet As Integer
+    Dim sheetNames() As String
+    Dim i As Integer
     
     ' FileSystemObject 생성
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -20,7 +19,6 @@ Sub SaveAllSheetsAsCSV()
     folderName = fso.GetBaseName(fileName)
     
     ' 시트 이름을 배열에 저장
-    Dim sheetNames() As String
     sheetNames = ListSheetNamesToArray()
     
     ' 총 시트 개수 계산
@@ -42,24 +40,8 @@ Sub SaveAllSheetsAsCSV()
         ' 진행 상황 표시
         Application.StatusBar = "Processing sheet " & currentSheet & " of " & totalSheet & ": " & ws.Name
         
-        ' 임시 워크북 생성
-        ws.Copy
-        
-        Set tempWb = ActiveWorkbook
-        Set tempWs = tempWb.Sheets(1)
-             
-        tempWs.Range("A1").CurrentRegion.Select
-        
-        BreakandFill2 Selection
-             
-        ' CSV 파일로 저장 (기존 파일 덮어쓰기)
-        Application.DisplayAlerts = False
-        tempWb.SaveAs fileName:=csvFolderPath & ws.Name & ".csv", FileFormat:=xlCSV, CreateBackup:=False
-        Application.DisplayAlerts = True
-        
-        ' 임시 워크북 닫기
-        tempWb.Close SaveChanges:=False
-        
+        ' CSV 파일로 저장
+        SaveSheetAsCSV ws, csvFolderPath & ws.Name & ".csv"
     Next i
     
     ' 상태 표시줄 초기화
@@ -92,38 +74,30 @@ Function ListSheetNamesToArray() As String()
     ListSheetNamesToArray = sheetNames
 End Function
 
-Public Sub BreakandFill2(rngWork As Range)
-    Dim header_row As Integer
-    Dim cardNo_col As Integer
-    Dim cardNo_col_chr As String
-    Dim cell As Range
-    
+Sub SaveSheetAsCSV(ws As Worksheet, filePath As String)
+    Dim fs As Object
+    Dim aCell As Range
+    Dim rowNum As Long
+    Dim colNum As Long
+    Dim csvLine As String
     Dim replaceWith As String
-    Dim cellValue As String
-    Dim mergeRange As Range
     
     replaceWith = ";"
     
-    Application.DisplayAlerts = False
-
-    ' Replace newline characters in cell values
-    For Each cell In rngWork
-        cellValue = cell.value
-        If InStr(1, cellValue, vbLf) > 0 Or InStr(1, cellValue, vbCr) > 0 Then
-            cellValue = Replace(Replace(cellValue, vbLf, replaceWith), vbCr, replaceWith)
-            cell.value = cellValue
-        End If
-    Next cell
-
-    ' Handle merged cells
-    For Each cell In rngWork
-        If cell.MergeCells Then
-            Set mergeRange = cell.MergeArea
-            cellValue = cell.value
-            cell.UnMerge
-            mergeRange.value = Replace(Replace(cellValue, vbLf, replaceWith), vbCr, replaceWith)
-        End If
-    Next cell
+    Set fs = CreateObject("Scripting.FileSystemObject").CreateTextFile(filePath, True)
     
+    Application.DisplayAlerts = False
+    
+    For rowNum = 1 To ws.UsedRange.Rows.Count
+        csvLine = ""
+        For colNum = 1 To ws.UsedRange.Columns.Count
+            Set aCell = ws.Cells(rowNum, colNum)
+            csvLine = csvLine & Replace(Replace(aCell.Value, vbLf, replaceWith), vbCr, replaceWith) & ","
+        Next colNum
+        csvLine = Left(csvLine, Len(csvLine) - 1)
+        fs.WriteLine csvLine
+    Next rowNum
+    
+    fs.Close
     Application.DisplayAlerts = True
 End Sub
