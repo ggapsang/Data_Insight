@@ -34,7 +34,7 @@ Sub SaveAllSheetsAsCSV()
     
     ' 배열의 시트 이름들만 반복
     For i = LBound(sheetNames) To UBound(sheetNames)
-        Set ws = ThisWorkbook.Sheets(sheetNames(i))
+        Set ws = ActiveWorkbook.Sheets(sheetNames(i))
         currentSheet = i - LBound(sheetNames) + 1
         
         ' 진행 상황 표시
