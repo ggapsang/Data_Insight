@@ -25,7 +25,7 @@ Sub SaveAllSheetsAsCSV()
     totalSheet = UBound(sheetNames) - LBound(sheetNames) + 1
     
     ' 폴더 경로 설정
-    csvFolderPath = ThisWorkbook.Path & "\" & folderName & "\"
+    csvFolderPath = ActiveWorkbook.Path & "\" & folderName & "\"
     
     ' 폴더가 존재하지 않으면 생성
     If Dir(csvFolderPath, vbDirectory) = "" Then
