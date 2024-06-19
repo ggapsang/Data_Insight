@@ -92,7 +92,8 @@ Sub SaveSheetAsCSV(ws As Worksheet, filePath As String)
         csvLine = ""
         For colNum = 1 To ws.UsedRange.Columns.Count
             Set aCell = ws.Cells(rowNum, colNum)
-            csvLine = csvLine & Replace(Replace(aCell.Value, vbLf, replaceWith), vbCr, replaceWith) & ","
+            ' 모든 셀 값을 문자열로 처리하고 따옴표로 감쌈
+            csvLine = csvLine & """" & Replace(Replace(CStr(aCell.Value), vbLf, replaceWith), vbCr, replaceWith) & """" & ","
         Next colNum
         csvLine = Left(csvLine, Len(csvLine) - 1)
         fs.WriteLine csvLine
