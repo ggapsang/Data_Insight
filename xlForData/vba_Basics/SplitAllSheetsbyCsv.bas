@@ -6,7 +6,8 @@ Sub SaveAllSheetsAsCSV()
     Dim folderName As String
     Dim fso As Object
     Dim fileName As String
-    Dim tempWs As Worksheet
+    Dim tempWs: Worksheet
+    Dim i As Integer
     
     Dim totalSheet As Integer
     Dim currentSheet As Integer
@@ -22,6 +23,9 @@ Sub SaveAllSheetsAsCSV()
     Dim sheetNames() As String
     sheetNames = ListSheetNamesToArray()
     
+    ' 총 시트 개수 계산
+    totalSheet = UBound(sheetNames) - LBound(sheetNames) + 1
+    
     ' 폴더 경로 설정
     csvFolderPath = ThisWorkbook.Path & "\" & folderName & "\"
     
@@ -33,7 +37,10 @@ Sub SaveAllSheetsAsCSV()
     ' 배열의 시트 이름들만 반복
     For i = LBound(sheetNames) To UBound(sheetNames)
         Set ws = ThisWorkbook.Sheets(sheetNames(i))
-        currentSheet = currentSheet + 1
+        currentSheet = i - LBound(sheetNames) + 1
+        
+        ' 진행 상황 표시
+        Application.StatusBar = "Processing sheet " & currentSheet & " of " & totalSheet & ": " & ws.Name
         
         ' 임시 워크북 생성
         ws.Copy
@@ -54,6 +61,9 @@ Sub SaveAllSheetsAsCSV()
         tempWb.Close SaveChanges:=False
         
     Next i
+    
+    ' 상태 표시줄 초기화
+    Application.StatusBar = False
     
     MsgBox "All sheets have been saved as CSV files in folder: " & csvFolderPath
 End Sub
@@ -89,35 +99,31 @@ Public Sub BreakandFill2(rngWork As Range)
     Dim cell As Range
     
     Dim replaceWith As String
+    Dim cellValue As String
+    Dim mergeRange As Range
     
     replaceWith = ";"
     
     Application.DisplayAlerts = False
 
+    ' Replace newline characters in cell values
     For Each cell In rngWork
-        Dim value As Variant
-        value = cell.value
-        If InStr(1, value, vbLf) > 0 Then
-            value = Replace(value, vbLf, replaceWith)
-            cell.value = value
-        ElseIf InStr(1, value, vbCr) > 0 Then
-            value = Replace(value, vbCr, replaceWith)
-            cell.value = value
+        cellValue = cell.value
+        If InStr(1, cellValue, vbLf) > 0 Or InStr(1, cellValue, vbCr) > 0 Then
+            cellValue = Replace(Replace(cellValue, vbLf, replaceWith), vbCr, replaceWith)
+            cell.value = cellValue
         End If
     Next cell
 
+    ' Handle merged cells
     For Each cell In rngWork
         If cell.MergeCells Then
-            Dim mergeRange As Range
             Set mergeRange = cell.MergeArea
+            cellValue = cell.value
             cell.UnMerge
-            value = cell.value
-            value = Replace(value, vbCrLf, replaceWith)
-            mergeRange.value = value
+            mergeRange.value = Replace(Replace(cellValue, vbLf, replaceWith), vbCr, replaceWith)
         End If
     Next cell
     
     Application.DisplayAlerts = True
 End Sub
-
-
