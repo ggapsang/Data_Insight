@@ -35,7 +35,7 @@ Sub MatchKeysInRangNumber()
     Dim keyS2 As String 'ws2의 key값
     Dim pmsCodeS2 As String 'ws2의 pms code 값
     Dim sizeS2 As Double 'ws2의 사이즈 값
-    
+
     '매칭 여부에 대한 플래그
     Dim matchFound As Boolean
     
@@ -43,13 +43,20 @@ Sub MatchKeysInRangNumber()
 '시트 정의
     
     Set ws1 = ThisWorkbook.Sheets("확정_여기서 작업")
-    Set ws2 = ActiveWorkbook.Sheets("개별속성 배관") '파일 불러오기로 동적으로 정의될 수 있음
-    
-    
+    Dim fd As FileDialog
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.Title = "Select the workbook"
+    fd.Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm", 1
+    If fd.Show = -1 Then
+        Set ws2 = Workbooks.Open(fd.SelectedItems(1)).Sheets(1)
+    Else
+        MsgBox "No file selected, exiting."
+        Exit Sub
+    End If
+
     ' 마지막 행 찾기
     lastRowS1 = ws1.Cells(ws1.Rows.Count, "A").End(xlUp).Row
-    lastRowS2 = ws2.Cells(ws2.Rows.Count, "A").End(xlUp).Row
-    
+    lastRowS2 = inputBp0x("데이터의 마지막 행: ")
     
     
 '데이터를 배열에 저장
