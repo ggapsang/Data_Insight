@@ -1,4 +1,4 @@
 SELECT "SR_No_ATTR", COUNT(*)
-FROM "표준데이터시트_개별속성_240528"
+FROM "개별속성리스트"
 GROUP BY "SR_No_ATTR"
 HAVING COUNT(*) > 1 ;
