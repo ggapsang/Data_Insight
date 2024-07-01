@@ -123,7 +123,7 @@ def find_next_text_in_y_direction_advance(df, reference_text, tolerance=3, max_d
     return next_text_row['Text']
 
 
-def process_extract_text(dxf_f_list, tolerance=2) :
+def process_extract_text(dxf_f_list, dest_path=os.getcwd(), tolerance=2, ) :
 
     col_f_nm = []
     col_pwht = []
