@@ -184,4 +184,3 @@ class FileList() :
         lst = []
         instance = cls(lst)
         instance.display_guide()
-
