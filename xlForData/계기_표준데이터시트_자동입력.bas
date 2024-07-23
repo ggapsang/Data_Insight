@@ -62,16 +62,16 @@ Sub GetInstrumentAttribute()
             For Each cell In rngMappingWs.Columns(1).SpecialCells(xlCellTypeVisible).Cells
                 If cell.Row > 1 Then '해더 행 제외
                     rowNumber = cell.Row
-                    colLetter = mappingWs.Range("E" & rowNumber).Value
+                   colLetter = mappingWs.Range("E" & rowNumber).Value
                     namedRange = mappingWs.Range("D" & rowNumber).Value
-                    subnamedRange = mappingWs.Ragne("F" & rowNumber).Value
+                    subnamedRange = mappingWs.Range("F" & rowNumber).Value
 
                     extractValue = GetNamedRangeValue(namedRange, datasheetWb)
                     If extractValue = "Error: not defined and invalid format" Then
                         extractValue = GetNamedRangeValue(subnamedRange, datasheetWb)
                     End If
 
-                    If InStr(1, visibleCell.Value, "NOTE") > 0 Or InStr(1, visibleCell.Value, "Note") Then
+                    If InStr(1, extractValue, "NOTE") > 0 Or InStr(1, extractValue, "Note") > 0 Then
                         extractValue = GetNamedRangeValue(subnamedRange, datasheetWb)
                     End If
 
