@@ -10,6 +10,7 @@ Sub GetInstrumentAttribute()
     
     Set wb = ThisWorkbook
     Set ws = wb.Sheets("계기")
+    'Set mappingWs = wb.Sheets("타입힌트")
     Set mappingWs = wb.Sheets("표준데이터시트 매핑")
     
     Dim wsLastRow As Long
@@ -25,6 +26,7 @@ Sub GetInstrumentAttribute()
     colDirName = FindColLetter(1, "Directory", ws)
     colExtractComplet = FindColLetter(1, "추출 완료", ws)
     colFormNm = FindColLetter(1, "타입(폼명)", ws)
+    coltypNm = FindColLetter(1, "타입", ws)
     colAttrGroupCode = FindColLetter(1, "속성 그룹 코드", ws)
 
     Dim rngMappingWs As Range
@@ -42,14 +44,17 @@ Sub GetInstrumentAttribute()
             Dim datasheetWb As Workbook
 
             file_path = ws.Range(colDirName & i).Value
-            Set datasheetWb = Workbooks.Open(file_path)
+            Set datasheetWb = Workbooks.Open(fileName:=file_path, UpdateLinks:=0)
 
-            Dim typeNm As String
-            typeNm = ws.Range(colFormNm & i).Value
+            Dim typNm As String
+            Dim formNm As String
+            formNm = ws.Range(colFormNm & i).Value
+            typNm = ws.Range(coltypNm & i).Value
             
             ' 표준데이터시트 매핑 시트에서 타입으로 필터링 후 E 열에 해당하는 위치 값에, D열 값 넣기
-            rngMappingWs.AutoFilter Field:=1, Criteria1:=typeNm
-
+            rngMappingWs.AutoFilter Field:=1, Criteria1:=formNm
+            rngMappingWs.AutoFilter Field:=2, Criteria1:=typNm
+            
             ' 필터링으로 보이는 값에 대해서만 순회
 
             Dim cell As Range
@@ -62,12 +67,16 @@ Sub GetInstrumentAttribute()
             For Each cell In rngMappingWs.Columns(1).SpecialCells(xlCellTypeVisible).Cells
                 If cell.Row > 1 Then '해더 행 제외
                     rowNumber = cell.Row
-                   colLetter = mappingWs.Range("E" & rowNumber).Value
+                    colLetter = mappingWs.Range("E" & rowNumber).Value
                     namedRange = mappingWs.Range("D" & rowNumber).Value
                     subnamedRange = mappingWs.Range("F" & rowNumber).Value
 
                     extractValue = GetNamedRangeValue(namedRange, datasheetWb)
                     If extractValue = "Error: not defined and invalid format" Then
+                        extractValue = GetNamedRangeValue(subnamedRange, datasheetWb)
+                    End If
+                    
+                    If extractValue = "Error: Invalid sheet name or cell address" Then
                         extractValue = GetNamedRangeValue(subnamedRange, datasheetWb)
                     End If
 
@@ -82,6 +91,7 @@ Sub GetInstrumentAttribute()
             On Error GoTo 0
 
             ' 오토필터 해제, 데이터시트 종료
+            mappingWs.AutoFilterMode = False
             mappingWs.AutoFilterMode = False
             datasheetWb.Close SaveChanges:=False
         End If
@@ -171,5 +181,3 @@ ErrHandler:
     GetNamedRangeValue = "Error: " & Err.Description
 
 End Function
-
-
