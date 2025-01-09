@@ -22,23 +22,68 @@ Sub 배관개별속성입력()
     On Error GoTo 0
 
     ' PMS 열 인덱스 가져오기
-    Dim pmsCols As Collection
-    Set pmsCols = New Collection
-    Dim headers As Variant: headers = Array("code", "MIN (float)", "MAX (float)", "OPERATING CONDITION TEMPERATURE", "GENERAL PWHT", "GENERAL BASE MATERIAL", "GENERAL C.A(mm)", "GENERAL MATERIAL", "GENERAL RATING", "GENERAL END CONNECTION TYPE", "GENERAL SCHEDULE", "GENERAL NON DESTRUCTIVE TEST RATE")
-    Dim i As Integer
-    For i = LBound(headers) To UBound(headers)
-        pmsCols.Add FindColLetter(1, headers(i), ws)
-    Next i
+    Dim pmsColCode As String 'pms 시트 code 열
+    Dim pmsColMin As String 'pms 시트 MIN (float) 열
+    Dim pmsColMax As String 'pms 시트 MAX (float) 열
+    Dim pmsColOperCond As String 'pms 시트 Operating Condition 열
+    Dim pmsColPwht As String 'pms 시트 PHWT 열
+    Dim pmsColBaseMat As String 'pms 시트 BASE MATERIAL 열
+    Dim pmsColCa As String 'pms 시트 C.A 열
+    Dim pmsColRating As String 'pms 시트 RATING 열
+    Dim pmsColMat As String 'pms 시트 GENERAL MATERIAL 열
+    Dim pmsColConnectType As String 'pms 시트 END TYPE CONNECTION 열
+    Dim pmsColSch As String 'pms 시트 GENERAL SCHEDULE 열
+    Dim pmsColNdt As String 'pms 시트 GENERAL NON DESTRUCTIVE TEST RATE 열
+
+    pmsColCode = FindColLetter(1, "code", ws)
+    pmsColMin = FindColLetter(1, "MIN (float)", ws)
+    pmsColMax = FindColLetter(1, "MAX (float)", ws)
+    pmsColOperCond = FindColLetter(1, "OPERATING CONDITION TEMPERATURE", ws)
+    pmsColPwht = FindColLetter(1, "GENERAL PWHT", ws)
+    pmsColBaseMat = FindColLetter(1, "GENERAL BASE MATERIAL", ws)
+    pmsColCa = FindColLetter(1, "GENERAL C.A(mm)", ws)
+    pmsColRating = FindColLetter(1, "GENERAL RATING", ws)
+    pmsColMat = FindColLetter(1, "GENERAL MATERIAL", ws)
+    pmsColConnectType = FindColLetter(1, "GENERAL END CONNECTION TYPE", ws)
+    pmsColSch = FindColLetter(1, "GENERAL SCHEDULE", ws)
+    pmsColNdt = FindColLetter(1, "GENERAL NON DESTRUCTIVE TEST RATE", ws)
 
     ' PMS 데이터 배열 저장
-    Dim pmsData As Variant
-    pmsData = ws.Range(ws.Cells(2, 1), ws.Cells(ws.Cells(ws.Rows.Count, 1).End(xlUp).Row, UBound(headers) + 1)).Value
+    Dim pmsData() As Variant
+    Dim lastRow As Long, lastCol As Long
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    pmsData = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol)).Value
 
     ' 개별 속성 데이터 저장
-    Dim pipColGroupCode As String, pipColLineClass As String, pipColLineSize As String
-    pipColGroupCode = FindColLetter(1, "속성 그룹 코드", pipWs)
-    pipColLineClass = FindColLetter(1, "개별속성8", pipWs)
-    pipColLineSize = FindColLetter(1, "개별속성9", pipWs)
+    Dim pipColTagNo As String '설비번호
+    Dim pipColType As String '공정별 분류 코드 : 10029001
+    Dim pipColGroupCode As String '속성 그룹 코드
+    Dim pipColLineClass As String '개별속성1 : GENERAL LINE CLASS
+    Dim pipColLineSize As String ' 개별속성2 : GENERAL LINE SIZE
+    Dim pipColPwht As String '개별속성16 : GENERAL PWHT
+    Dim pipColBaseMat As String '개별속성17 : GENERAL BASE MATERIAL
+    Dim pipColCA As String '개별속성18 : KILLED CS
+    Dim pipColRating As String '개별속성21 : GENERAL RATING
+    Dim pipColMaterial As String '개별속성22 : GENERAL MATERIAL
+    Dim pipColConType As String '개별속성24 : GENERAL END CONNECTION TYPE
+    Dim pipColSch As String '개별속성25 : GENERAL SCHEDULE
+    Dim pipColNDE As String '개별속성26 : GENERAL NON DESTRUCTIVE TEST RATE
+
+    pipColTagNo = FindColLetter(1, "설비번호", pipWs) '설비번호
+    pipColType = FindColLetter(1, "공정별 분류 코드", pipWs) '공정별 분류 코드 : 10029001
+    pipColGroupCode = FindColLetter(1, "속성 그룹 코드", pipWs) '속성 그룹 코드
+    pipColLineClass = FindColLetter(1, "개별속성8", pipWs) '개별속성1 : GENERAL LINE CLASS
+    pipColLineSize = FindColLetter(1, "개별속성9", pipWs) ' 개별속성2 : GENERAL LINE SIZE
+    pipColPwht = FindColLetter(1, "개별속성19", pipWs) '개별속성17 : GENERAL PWHT
+    pipColBaseMat = FindColLetter(1, "개별속성20", pipWs) '개별속성18 : GENERAL BASE MATERIAL
+    pipColCA = FindColLetter(1, "개별속성21", pipWs) '개별속성19 : KILLED CA
+    pipColRating = FindColLetter(1, "개별속성22", pipWs) '개별속성21 : GENERAL RATING
+    pipColMaterial = FindColLetter(1, "개별속성23", pipWs) '개별속성22 : GENERAL MATERIAL
+    pipColConType = FindColLetter(1, "개별속성25", pipWs) '개별속성24 : GENERAL END CONNECTION TYPE
+    pipColSch = FindColLetter(1, "개별속성26", pipWs) '개별속성25 : GENERAL SCHEDULE
+    pipColNDE = FindColLetter(1, "개별속성27", pipWs) '개별속성26 : GENERAL NON DESTRUCTIVE TEST RATE
 
     Dim visibleCells As Range, tagData As Variant, tagList As Collection
     Set tagList = New Collection
@@ -52,21 +97,18 @@ Sub 배관개별속성입력()
         End If
     Next visibleCell
 
-    ' 속성 데이터 입력
-    Dim rowNum As Long
-    Dim pmsColPwht As String, pmsColBaseMat As String
-    pmsColPwht = FindColLetter(1, "GENERAL PWHT", ws)
-    pmsColBaseMat = FindColLetter(1, "GENERAL BASE MATERIAL", ws)
+    Dim i As Long, rowNum As Long
 
     Application.StatusBar = "작업을 시작합니다..."
     For i = 1 To tagList.Count
-        For rowNum = LBound(pmsData) To UBound(pmsData)
-            If tagList(i)(1) = pmsData(rowNum, 1) Then
-                pipWs.Cells(i + 1, ws.Range(pmsColPwht & "1").Column).Value = pmsData(rowNum, 4)
-                pipWs.Cells(i + 1, ws.Range(pmsColBaseMat & "1").Column).Value = pmsData(rowNum, 5)
+        For rowNum = 2 To lastRow
+            If tagList(i)(1) = pmsData(rowNum, ws.Range(pmsColCode & "1").Column) Then
+                pipWs.Cells(i + 1, pipWs.Range(pipColPwht & "1").Column).Value = pmsData(rowNum, ws.Range(pmsColPwht & "1").Column)
+                pipWs.Cells(i + 1, pipWs.Range(pipColBaseMat & "1").Column).Value = pmsData(rowNum, ws.Range(pmsColBaseMat & "1").Column)
+                Exit For
             End If
         Next rowNum
-        If i Mod 10 = 0 Then Application.StatusBar = "진행 중: " & i & "/" & tagList.Count & " 완료..."
+        If i Mod 10 = 0 Then Application.StatusBar = "진행 중: " & i & " / " & tagList.Count & " 완료..."
     Next i
 
     MsgBox "완료"
@@ -80,20 +122,16 @@ Function GetWorkbookFromUser() As Workbook
     Dim fileName As String
     Dim isWorkbookOpen As Boolean
 
-    ' 파일 선택 창 표시
     filePath = Application.GetOpenFilename("엑셀 파일(*.xls;*.xlsx;*.xlsb;*.xlsm), *.xls;*.xlsx;*.xlsb;*.xlsm", , "파일 선택", , False)
 
-    ' 파일 선택 창에서 취소 버튼을 누른 경우
     If filePath = "False" Then
         MsgBox "취소", vbExclamation
         Set GetWorkbookFromUser = Nothing
         Exit Function
     End If
 
-    ' 선택한 파일의 이름 가져오기
     fileName = Dir(filePath)
 
-    ' 파일이 이미 열려 있는지 확인
     isWorkbookOpen = False
     For Each wb In Workbooks
         If wb.Name = fileName Then
@@ -103,7 +141,6 @@ Function GetWorkbookFromUser() As Workbook
         End If
     Next wb
 
-    ' 파일이 열려 있지 않으면 열기
     If Not isWorkbookOpen Then
         Set wb = Workbooks.Open(filePath)
         Set GetWorkbookFromUser = wb
@@ -117,7 +154,6 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
     Dim found_cell As Range
     Dim col_letter As String
 
-    ' 워크시트 변수를 설정. 기본값은 ActiveSheet
     If ws Is Nothing Then
         Set ws = ActiveSheet
     End If
@@ -132,6 +168,6 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
     Else
         FindColLetter = "Value not found."
         MsgBox (search_value & " is not found")
-    End If 
+    End If
 
 End Function
