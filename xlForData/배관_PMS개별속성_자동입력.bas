@@ -35,25 +35,35 @@ Sub 배관개별속성입력()
     pmsData = ws.Range(ws.Cells(2, 1), ws.Cells(ws.Cells(ws.Rows.Count, 1).End(xlUp).Row, UBound(headers) + 1)).Value
 
     ' 개별 속성 데이터 저장
+    Dim pipColGroupCode As String, pipColLineClass As String, pipColLineSize As String
+    pipColGroupCode = FindColLetter(1, "속성 그룹 코드", pipWs)
+    pipColLineClass = FindColLetter(1, "개별속성8", pipWs)
+    pipColLineSize = FindColLetter(1, "개별속성9", pipWs)
+
     Dim visibleCells As Range, tagData As Variant, tagList As Collection
     Set tagList = New Collection
 
-    Set visibleCells = pipWs.Range(pipWs.Cells(2, pipWs.Range("속성 그룹 코드" & "1").Column), pipWs.Cells(pipWs.Cells(ws.Rows.Count, 1).End(xlUp).Row, pipWs.Range("속성 그룹 코드" & "1").Column)).SpecialCells(xlCellTypeVisible)
+    Set visibleCells = pipWs.Range(pipWs.Cells(2, pipWs.Range(pipColGroupCode & "1").Column), pipWs.Cells(pipWs.Cells(pipWs.Rows.Count, pipWs.Range(pipColGroupCode & "1").Column).End(xlUp).Row, pipWs.Range(pipColGroupCode & "1").Column)).SpecialCells(xlCellTypeVisible)
+
     For Each visibleCell In visibleCells
         If InStr(1, visibleCell.Value, "03") > 0 Then
-            tagData = Array(pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성8" & "1").Column).Value, pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성9" & "1").Column).Value)
+            tagData = Array(pipWs.Cells(visibleCell.Row, pipWs.Range(pipColLineClass & "1").Column).Value, pipWs.Cells(visibleCell.Row, pipWs.Range(pipColLineSize & "1").Column).Value)
             tagList.Add tagData
         End If
     Next visibleCell
 
     ' 속성 데이터 입력
     Dim rowNum As Long
+    Dim pmsColPwht As Integer, pmsColBaseMat As Integer
+    pmsColPwht = FindColLetter(1, "GENERAL PWHT", pipWs)
+    pmsColBaseMat = FindColLetter(1, "GENERAL BASE MATERIAL", pipWs)
+
     Application.StatusBar = "작업을 시작합니다..."
     For i = 1 To tagList.Count
         For rowNum = LBound(pmsData) To UBound(pmsData)
             If tagList(i)(1) >= pmsData(rowNum, 2) And tagList(i)(1) <= pmsData(rowNum, 3) Then
-                pipWs.Cells(i + 1, pipWs.Range("GENERAL PWHT" & "1").Column).Value = pmsData(rowNum, 4)
-                pipWs.Cells(i + 1, pipWs.Range("GENERAL BASE MATERIAL" & "1").Column).Value = pmsData(rowNum, 5)
+                pipWs.Cells(i + 1, pmsColPwht).Value = pmsData(rowNum, 4)
+                pipWs.Cells(i + 1, pmsColBaseMat).Value = pmsData(rowNum, 5)
             End If
         Next rowNum
         If i Mod 10 = 0 Then Application.StatusBar = "진행 중: " & i & "/" & tagList.Count & " 완료..."
@@ -116,7 +126,7 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
     Set found_cell = search_rng.Find(What:=search_value, LookIn:=xlValues, LookAt:=xlWhole)
 
     If Not found_cell Is Nothing Then
-        col_letter = Replace(found_cell.Cells.Address(False, False), hdr_row & "", "")
+        col_letter = found_cell.Column
         FindColLetter = col_letter
     Else
         FindColLetter = "Value not found."
