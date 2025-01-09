@@ -179,32 +179,41 @@ Sub 배관개별속성입력()
     Dim idx As Integer
 
     Application.StatusBar = "작업을 시작합니다..."
-
     For k = 1 To pipLastRow - startRow + 1
-
+    
         Dim strKey As String
         Dim numberKey As Double
-        
+        Dim searchResults(4 To 11) As Variant
+    
         strKey = Tags(k, 1)
         numberKey = Tags(k, 2)
-        pipWs.Range(pipColPwht & startRow + k - 1).Value = SearchValue(strKey, numberKey, 4, PMS) ' PWHT 입력
-        pipWs.Range(pipColBaseMat & startRow + k - 1).Value = SearchValue(strKey, numberKey, 5, PMS) ' BASE MATERIAL  입력
-        pipWs.Range(pipColCA & startRow + k - 1).Value = SearchValue(strKey, numberKey, 6, PMS) ' C.A 입력
-        pipWs.Range(pipColRating & startRow + k - 1).Value = SearchValue(strKey, numberKey, 7, PMS) ' RATING 입력
-        pipWs.Range(pipColMaterial & startRow + k - 1).Value = SearchValue(strKey, numberKey, 8, PMS) ' MATERIAL 입력
-        pipWs.Range(pipColConType & startRow + k - 1).Value = SearchValue(strKey, numberKey, 9, PMS) ' END CONNECTION TYPE 입력
-        pipWs.Range(pipColSch & startRow + k - 1).Value = SearchValue(strKey, numberKey, 10, PMS) ' SCHEDULE 입력
-        pipWs.Range(pipColNDE & startRow + k - 1).Value = SearchValue(strKey, numberKey, 11, PMS) ' NDE RATE 입력
-
+    
+        ' SearchValue 호출을 한 번으로 줄이고 결과 캐싱
+        For i = 4 To 11
+            searchResults(i) = SearchValue(strKey, numberKey, i, PMS)
+        Next i
+    
+        ' With 구문을 사용하여 pipWs 호출 최소화
+        With pipWs
+            .Range(pipColPwht & startRow + k - 1).Value = searchResults(4) ' PWHT 입력
+            .Range(pipColBaseMat & startRow + k - 1).Value = searchResults(5) ' BASE MATERIAL 입력
+            .Range(pipColCA & startRow + k - 1).Value = searchResults(6) ' C.A 입력
+            .Range(pipColRating & startRow + k - 1).Value = searchResults(7) ' RATING 입력
+            .Range(pipColMaterial & startRow + k - 1).Value = searchResults(8) ' MATERIAL 입력
+            .Range(pipColConType & startRow + k - 1).Value = searchResults(9) ' END CONNECTION TYPE 입력
+            .Range(pipColSch & startRow + k - 1).Value = searchResults(10) ' SCHEDULE 입력
+            .Range(pipColNDE & startRow + k - 1).Value = searchResults(11) ' NDE RATE 입력
+        End With
+    
         ' 상태 표시줄 업데이트
         If k Mod 10 = 0 Then ' 10개의 행마다 상태 업데이트
             Application.StatusBar = "처리 중: " & k & " / " & Total & " (" & Format(k / pipLastRow, "0%") & " 완료)"
         End If
-
-    Next k
-
-    MsgBox "완료"
     
+    Next k
+    
+    MsgBox "완료"
+   
     Application.ScreenUpdating = True
     Application.Calculation = xlAutomatic
 
