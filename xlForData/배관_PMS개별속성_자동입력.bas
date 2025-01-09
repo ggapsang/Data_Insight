@@ -4,10 +4,8 @@ Sub 배관개별속성입력()
 
     ' 워크시트 정의
     Dim wb As Workbook, ws As Worksheet, pipWb As Workbook, pipWs As Worksheet
-    Dim sizeWs As Worksheet
     Set wb = ThisWorkbook
     Set ws = wb.Sheets("PMS")
-    Set sizeWs = wb.Sheets("사이즈 변환")
 
     ' 사용자로부터 워크북 및 워크시트 선택
     Set pipWb = GetWorkbookFromUser
@@ -43,7 +41,7 @@ Sub 배관개별속성입력()
     Set visibleCells = pipWs.Range(pipWs.Cells(2, pipWs.Range("속성 그룹 코드" & "1").Column), pipWs.Cells(pipWs.Cells(ws.Rows.Count, 1).End(xlUp).Row, pipWs.Range("속성 그룹 코드" & "1").Column)).SpecialCells(xlCellTypeVisible)
     For Each visibleCell In visibleCells
         If InStr(1, visibleCell.Value, "03") > 0 Then
-            tagData = Array(pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성8" & "1").Column).Value, GetFloatSize(pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성9" & "1").Column).Value, sizeWs))
+            tagData = Array(pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성8" & "1").Column).Value, pipWs.Cells(visibleCell.Row, pipWs.Range("개별속성9" & "1").Column).Value)
             tagList.Add tagData
         End If
     Next visibleCell
@@ -66,8 +64,44 @@ Sub 배관개별속성입력()
     Application.Calculation = xlAutomatic
 End Sub
 
-Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws As Worksheet = Nothing) As String
+Function GetWorkbookFromUser() As Workbook
+    Dim wb As Workbook
+    Dim filePath As String
+    Dim fileName As String
+    Dim isWorkbookOpen As Boolean
 
+    ' 파일 선택 창 표시
+    filePath = Application.GetOpenFilename("엑셀 파일(*.xls;*.xlsx;*.xlsb;*.xlsm), *.xls;*.xlsx;*.xlsb;*.xlsm", , "파일 선택", , False)
+
+    ' 파일 선택 창에서 취소 버튼을 누른 경우
+    If filePath = "False" Then
+        MsgBox "취소", vbExclamation
+        Set GetWorkbookFromUser = Nothing
+        Exit Function
+    End If
+
+    ' 선택한 파일의 이름 가져오기
+    fileName = Dir(filePath)
+
+    ' 파일이 이미 열려 있는지 확인
+    isWorkbookOpen = False
+    For Each wb In Workbooks
+        If wb.Name = fileName Then
+            isWorkbookOpen = True
+            Set GetWorkbookFromUser = wb
+            Exit Function
+        End If
+    Next wb
+
+    ' 파일이 열려 있지 않으면 열기
+    If Not isWorkbookOpen Then
+        Set wb = Workbooks.Open(filePath)
+        Set GetWorkbookFromUser = wb
+    End If
+
+End Function
+
+Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws As Worksheet = Nothing) As String
     Dim search_rng As Range
     Dim found_cell As Range
     Dim col_letter As String
@@ -86,7 +120,6 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
         FindColLetter = col_letter
     Else
         FindColLetter = "Value not found."
-        MsgBox (search_value & "is not found")
-    End If 
-
+        MsgBox (search_value & " is not found")
+    End If
 End Function
