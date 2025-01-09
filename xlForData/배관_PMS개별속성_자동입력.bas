@@ -112,6 +112,7 @@ Function GetWorkbookFromUser() As Workbook
 End Function
 
 Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws As Worksheet = Nothing) As String
+
     Dim search_rng As Range
     Dim found_cell As Range
     Dim col_letter As String
@@ -126,10 +127,11 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
     Set found_cell = search_rng.Find(What:=search_value, LookIn:=xlValues, LookAt:=xlWhole)
 
     If Not found_cell Is Nothing Then
-        col_letter = found_cell.Column
+        col_letter = Replace(found_cell.Cells.Address(False, False), hdr_row & "", "")
         FindColLetter = col_letter
     Else
         FindColLetter = "Value not found."
         MsgBox (search_value & " is not found")
-    End If
+    End If 
+
 End Function
