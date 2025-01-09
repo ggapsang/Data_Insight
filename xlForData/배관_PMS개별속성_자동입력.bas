@@ -54,16 +54,16 @@ Sub 배관개별속성입력()
 
     ' 속성 데이터 입력
     Dim rowNum As Long
-    Dim pmsColPwht As Integer, pmsColBaseMat As Integer
-    pmsColPwht = FindColLetter(1, "GENERAL PWHT", pipWs)
-    pmsColBaseMat = FindColLetter(1, "GENERAL BASE MATERIAL", pipWs)
+    Dim pmsColPwht As String, pmsColBaseMat As String
+    pmsColPwht = FindColLetter(1, "GENERAL PWHT", ws)
+    pmsColBaseMat = FindColLetter(1, "GENERAL BASE MATERIAL", ws)
 
     Application.StatusBar = "작업을 시작합니다..."
     For i = 1 To tagList.Count
         For rowNum = LBound(pmsData) To UBound(pmsData)
-            If tagList(i)(1) >= pmsData(rowNum, 2) And tagList(i)(1) <= pmsData(rowNum, 3) Then
-                pipWs.Cells(i + 1, pmsColPwht).Value = pmsData(rowNum, 4)
-                pipWs.Cells(i + 1, pmsColBaseMat).Value = pmsData(rowNum, 5)
+            If tagList(i)(1) = pmsData(rowNum, 1) Then
+                pipWs.Cells(i + 1, ws.Range(pmsColPwht & "1").Column).Value = pmsData(rowNum, 4)
+                pipWs.Cells(i + 1, ws.Range(pmsColBaseMat & "1").Column).Value = pmsData(rowNum, 5)
             End If
         Next rowNum
         If i Mod 10 = 0 Then Application.StatusBar = "진행 중: " & i & "/" & tagList.Count & " 완료..."
