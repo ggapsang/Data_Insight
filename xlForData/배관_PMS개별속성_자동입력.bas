@@ -1,6 +1,7 @@
 Sub 배관개별속성입력()
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
+    Application.DisplayStatusBar = False
 
 '' 전역 변수
 
@@ -93,16 +94,16 @@ Sub 배관개별속성입력()
         pipColTagNo = FindColLetter(1, "설비번호", pipWs) '설비번호
         pipColType = FindColLetter(1, "공정별 분류 코드", pipWs) '공정별 분류 코드 : 10029001
         pipColGroupCode = FindColLetter(1, "속성 그룹 코드", pipWs) '속성 그룹 코드
-        pipColLineClass = FindColLetter(1, "개별속성1", pipWs) '개별속성1 : GENERAL LINE CLASS
-        pipColLineSize = FindColLetter(1, "개별속성2", pipWs) ' 개별속성2 : GENERAL LINE SIZE
-        pipColPwht = FindColLetter(1, "개별속성17", pipWs) '개별속성17 : GENERAL PWHT
-        pipColBaseMat = FindColLetter(1, "개별속성18", pipWs) '개별속성18 : GENERAL BASE MATERIAL
-        pipColCA = FindColLetter(1, "개별속성19", pipWs) '개별속성19 : KILLED CS
-        pipColRating = FindColLetter(1, "개별속성21", pipWs) '개별속성21 : GENERAL RATING
-        pipColMaterial = FindColLetter(1, "개별속성22", pipWs) '개별속성22 : GENERAL MATERIAL
-        pipColConType = FindColLetter(1, "개별속성24", pipWs) '개별속성24 : GENERAL END CONNECTION TYPE
-        pipColSch = FindColLetter(1, "개별속성25", pipWs) '개별속성25 : GENERAL SCHEDULE
-        pipColNDE = FindColLetter(1, "개별속성26", pipWs) '개별속성26 : GENERAL NON DESTRUCTIVE TEST RATE
+        pipColLineClass = FindColLetter(1, "개별속성8", pipWs) '개별속성8 : GENERAL LINE CLASS
+        pipColLineSize = FindColLetter(1, "개별속성9", pipWs) ' 개별속성9 : GENERAL LINE SIZE
+        pipColPwht = FindColLetter(1, "개별속성19", pipWs) '개별속성19 : GENERAL PWHT
+        pipColBaseMat = FindColLetter(1, "개별속성20", pipWs) '개별속성20 : GENERAL BASE MATERIAL
+        pipColCA = FindColLetter(1, "개별속성21", pipWs) '개별속성21 : CORROSION ALLOWANCE
+        pipColRating = FindColLetter(1, "개별속성22", pipWs) '개별속성22 : GENERAL RATING
+        pipColMaterial = FindColLetter(1, "개별속성23", pipWs) '개별속성23 : GENERAL MATERIAL
+        pipColConType = FindColLetter(1, "개별속성25", pipWs) '개별속성25 : GENERAL END CONNECTION TYPE
+        pipColSch = FindColLetter(1, "개별속성26", pipWs) '개별속성26 : GENERAL SCHEDULE
+        pipColNDE = FindColLetter(1, "개별속성27", pipWs) '개별속성27 : GENERAL NON DESTRUCTIVE TEST RATE
 
     '' 정렬
         Dim pipLastRow As Long
@@ -216,7 +217,8 @@ Sub 배관개별속성입력()
    
     Application.ScreenUpdating = True
     Application.Calculation = xlAutomatic
-
+    Application.DisplayStatusBar = True
+    Application.StatusBar = False
 
 End Sub
 
@@ -337,5 +339,3 @@ Function FindColLetter(hdr_row As Integer, search_value As Variant, Optional ws 
     End If
 
 End Function
-
-
